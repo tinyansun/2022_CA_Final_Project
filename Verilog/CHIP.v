@@ -33,7 +33,19 @@ module CHIP(clk,
     //---------------------------------------//
 
     // Todo: other wire/reg
+    assign rs1 = instruction[19 : 15];
+    assign rs2 = instruction[24 : 20];
+    assign rd = instruction[11 : 7];
+    wire Branch_control;
+    wire MemRead_control;
+    wire MemWrite_control;
+    reg  [1 : 0] MemtoReg_control;
+    reg  [1 : 0] ALUOp_control;
+    wire ALUSrc_control_1;
+    wire ALUSrc_control_2;
+    wire jump_select;
 
+    wire [31 : 0] imm_gen_output;
     //---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -49,6 +61,42 @@ module CHIP(clk,
     //---------------------------------------//
 
     // Todo: any combinational/sequential circuit
+
+    Control Control(
+        .Op_input(instruction[6 : 0]),
+        .Branch_output(Branch_control),
+        .MemRead_output(MemRead_control),
+        .MemWrite_output(MemWrite_control),
+        .MemtoReg_output(MemtoReg_control),
+        .ALUOp_output(ALUOp_control),
+        .ALUSrc_output_1(ALUSrc_control_1),
+        .ALUSrc_output_2(ALUSrc_control_2),
+        .RegWrite_output(regWrite),
+        .jump_select_output(jump_select)
+    )
+
+    // Imm Gen (32 bits in, 32 bits out)
+    Sign_Extend Sign_Extend(
+        .inst_input (instruction[31 : 0]),
+        .imm_output (imm_gen_output)
+    );
+
+    // MUX between register and ALU (for rs1 and PC)
+    MUX_2_to_1 MUX_reg_to_ALU(
+        data1_input(rs1_data),
+        data2_input(PC),
+        select_input(ALUSrc_control_1),
+        data_output()                //ALU 1st input
+    )
+
+    // MUX between register and ALU (for rs2 and imm_gen output)
+    MUX_2_to_1 MUX_reg_to_ALU(
+        data1_input(rs2_data),
+        data2_input(imm_gen_output),
+        select_input(ALUSrc_control_2),
+        data_output()                //ALU 2nd input
+    )
+
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -110,3 +158,144 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     // Todo: your HW2
 
 endmodule
+
+module Control
+(
+	Op_input,
+    Branch_output,
+    MemRead_output,
+    MemWrite_output,
+    MemtoReg_output,
+	ALUOp_output,
+    ALUSrc_output_1,
+	ALUSrc_output_2,
+	RegWrite_output,
+    jalr_select_output
+);
+
+input  [6 : 0] Op_input;
+output [1 : 0] ALUOp_output;
+output         ALUSrc_output_1;
+output         ALUSrc_output_2;
+output         Branch_output;
+output         MemRead_output;
+output         MemWrite_output;
+output [1 : 0] MemtoReg_output;
+output         RegWrite_output;
+output         jump_select_output;
+
+reg [1 : 0] ALUOp_reg;
+reg [1 : 0] MemtoReg_reg;
+
+assign ALUOp_output = ALUOp_reg;
+assign ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
+assign ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
+assign Branch_output = (Op_input == 7'1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
+assign MemRead_output = (Op_input == 7'0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
+assign MemWrite_output = (Op_input == 7'0100011)? 1'b1 : 1'b0;
+assign RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
+assign MemtoReg_output = MemtoReg_reg;                                                                                                                                                            // 7'b1100111 for jalr wb
+assign jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
+
+always @(Op_input)
+begin
+    if (Op_i == 7'b0110011) // R-type inst, MUL, DIV, XOR
+	begin
+		ALUOp_reg = 2'b10; 
+		MemtoReg_reg = 2'b00; // select ALU result to write data
+	end
+	else if (Op_i == 7'b0010011 || Op_i == 7'b0010111) // I-type inst, auipc, slti, srai
+	begin
+		ALUOp_reg = 2'b11;
+		MemtoReg_reg = 2'b00; // select ALU result to write data
+	end
+	else if (Op_i == 7'b0000011) // lw inst
+	begin
+		ALUOp_reg = 2'b00;
+		MemtoReg_reg = 2'b01; // select memory result to write data
+	end
+	else if (Op_i == 7'b0100011) // sw inst
+	begin
+		ALUOp_reg = 2'b00;
+	end
+	else if (Op_i == 7'b1100011) // beq inst
+	begin
+		ALUOp_reg = 2'b01;
+	end
+    else if (Op_i == 7'b1100111 || Op_i == 7'b1101111) // jalr, jal inst
+	begin
+        ALUOp_reg = 2'b11;    
+        MemtoReg_reg = 2'b10; // select PC+4 result to write data in register
+    end
+end
+
+
+endmodule
+
+module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and jal
+(
+	inst_input,
+	imm_output
+);
+
+input  [31 : 0] inst_input;
+output [31 : 0] imm_output;
+
+reg [11 : 0] imm_reg;
+reg [31 : 0] imm_output_reg;
+assign imm_output = imm_output_reg;
+
+always @(inst_input)
+begin
+	if (inst_input[6 : 0] == 7'b0010011 || inst_input[6 : 0] == 7'b0000011 || inst_input[6 : 0] == 7'b1100111) // I-type, load, jalr
+	begin
+		imm_reg[11 : 0] = inst_input[31 : 20];
+        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+	end
+	else if (inst_input[6 : 0] == 7'b0100011) // store
+	begin
+		imm_reg[4 : 0] = inst_input[11 : 7];
+		imm_reg[11 : 5] = inst_input[31 : 25];
+        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+	end
+	else if (inst_input[6 : 0] == 7'b1100011) // beq
+	begin
+		imm_reg[3 : 0] = inst_input[11 : 8];
+		imm_reg[9 : 4] = inst_input[30 : 25];
+		imm_reg[10] = inst_input[7];
+		imm_reg[11] = inst_input[31];
+        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+	end
+    else if (inst_input[6 : 0] == 7'b0010111) // auipc
+    begin
+        imm_output_reg = {{12{inst_input[31]}} , inst_input[31 : 12]};
+    end
+    else if (inst_input[6 : 0] == 7'b1101111) // jal
+    begin
+        imm_reg[9 : 0] = inst_input[30 : 21];
+		imm_reg[10] = inst_input[20];
+		imm_reg[18 : 11] = inst_input[19 : 12];
+		imm_reg[19] = inst_input[31];
+        imm_output_reg = {{12{imm_reg[19]}} , imm_reg[19 : 0]};
+    end
+end
+
+endmodule
+
+module MUX_2_to_1
+(
+	data1_input,
+	data2_input,
+	select_input,
+	data_output
+);
+
+input  [31 : 0] data1_input;
+input  [31 : 0] data2_input;
+input           select_input;
+output [31 : 0] data_output;
+
+assign data_output = (select_input == 1'b0)? data1_input : data2_input;
+
+endmodule
+
