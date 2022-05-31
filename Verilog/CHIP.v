@@ -169,8 +169,8 @@ module Control
 	ALUOp_output,
     ALUSrc_output_1,
 	ALUSrc_output_2,
-	RegWrite_output,
-    jalr_select_output
+	 RegWrite_output,
+    jump_select_output
 );
 
 input  [6 : 0] Op_input;
