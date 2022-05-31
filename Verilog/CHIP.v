@@ -73,7 +73,7 @@ module CHIP(clk,
         .ALUSrc_output_2(ALUSrc_control_2),
         .RegWrite_output(regWrite),
         .jump_select_output(jump_select)
-    )
+    );
 
     // Imm Gen (32 bits in, 32 bits out)
     Sign_Extend Sign_Extend(
@@ -87,7 +87,7 @@ module CHIP(clk,
         data2_input(PC),
         select_input(ALUSrc_control_1),
         data_output()                //ALU 1st input
-    )
+    );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
     MUX_2_to_1 MUX_reg_to_ALU(
@@ -95,7 +95,7 @@ module CHIP(clk,
         data2_input(imm_gen_output),
         select_input(ALUSrc_control_2),
         data_output()                //ALU 2nd input
-    )
+    );
 
 
     always @(posedge clk or negedge rst_n) begin
@@ -161,15 +161,15 @@ endmodule
 
 module Control
 (
-	Op_input,
+    Op_input,
     Branch_output,
     MemRead_output,
     MemWrite_output,
     MemtoReg_output,
-	ALUOp_output,
+    ALUOp_output,
     ALUSrc_output_1,
-	ALUSrc_output_2,
-	 RegWrite_output,
+    ALUSrc_output_2,
+    RegWrite_output,
     jump_select_output
 );
 
