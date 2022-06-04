@@ -54,7 +54,7 @@ module CHIP(clk,
 	
     wire [31 : 0] imm_gen_output;
 	
-    reg  [3 : 0] ALU_operation;
+    wire [3 : 0]  ALU_operation;
     wire [31 : 0] ALU_input_1;
     wire [31 : 0] ALU_input_2;
     wire ALU_zero;
