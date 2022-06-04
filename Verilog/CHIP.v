@@ -63,7 +63,7 @@ module CHIP(clk,
     
     wire Mem_Read_Write;
     wire [31 : 0] Mem_output;
-	wire muldiv_valid;
+	reg muldiv_valid;
 	//--------------------------------assign--------------------------------------------
 	
 	assign rs1 = mem_rdata_I[19 : 15];
