@@ -349,9 +349,7 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
 endmodule
 
 module Control
-(   clk,
-    rst_n,
-    state,
+(   
     Op_input,
     Branch_output,
     MemRead_output,
@@ -363,8 +361,7 @@ module Control
 	RegWrite_output,
     jump_select_output
 );
-input clk, rst_n;
-input  [2 : 0] state;
+
 input  [6 : 0] Op_input;
 output reg [1 : 0] ALUOp_output;
 output reg ALUSrc_output_1;
