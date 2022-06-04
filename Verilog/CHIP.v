@@ -59,6 +59,7 @@ module CHIP(clk,
     wire [31 : 0] ALU_input_2;
     wire ALU_zero;
     wire [31 : 0] ALU_output;
+    wire muldiv_ready;
     
     wire Mem_Read_Write;
     wire [31 : 0] Mem_output;
@@ -124,29 +125,33 @@ module CHIP(clk,
     // ALU Control
     ALU_Control ALU_Control(
         .ALUControl_op_input(ALUOp_control),
-        .ALUControl_instruction_input(instruction[31 : 0]),
+        .ALUControl_instruction_input(mem_rdata_I[31 : 0]),
         .ALUControl_output(ALU_operation)   //ALU_control_op_input
     );
 
     // ALU
     ALU ALU(
+        .clk(clk),
+        .rst_n(rst_n),
         .ALU_input_1(ALU_input_1),
         .ALU_input_2(ALU_input_2),
         .ALU_control_op_input(ALU_operation),
+        .muldiv_valid(muldiv_valid),
+        .muldiv_ready(muldiv_ready),
         .ALU_zero(ALU_zero),
         .ALU_output(ALU_output)
     );
 
     // memory
-    memory memory(
-        .clk(clk),
-        .rst_n(rst_n),
-        .wen(Mem_Read_Write_control),   //0: read; 1: write
-        .a(ALU_output),
-        .d(rs2_data),
-        .q(Mem_output),                 //memory data output
-        .offset()
-    );
+    // memory memory(
+    //     .clk(clk),
+    //     .rst_n(rst_n),
+    //     .wen(Mem_Read_Write_control),   //0: read; 1: write
+    //     .a(ALU_output),
+    //     .d(rs2_data),
+    //     .q(Mem_output),                 //memory data output
+    //     .offset()
+    // );
 
     // MUX between memory and register (for ALU output and read data from memory)
     MUX_3_to_1 MUX_mem_to_reg(
@@ -497,7 +502,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     // Definition of ports
     input         clk, rst_n;
     input         valid;
-    input         mode; // mode: 0: mulu, 1: divu, //2: and, 3: avg
+    input  [3:0]  mode; // mode: 0: mulu, 1: divu, //2: and, 3: avg
     output        ready;
 
     input  [31:0] in_A, in_B;
@@ -528,8 +533,8 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
                 if (valid == 0) state_nxt = state;
                 else begin
                     case(mode)
-                        1'b0: state_nxt = MUL;
-                        1'b1: state_nxt = DIV;
+                        4'b0110: state_nxt = MUL;
+                        4'b0111: state_nxt = DIV;
                         default: state_nxt = IDLE;
                     endcase
                 end
@@ -639,20 +644,24 @@ module ALU(
     input  [31 : 0] ALU_input_1;
     input  [31 : 0] ALU_input_2;
     input  [3 : 0] ALU_control_op_input;
-    input  muldiv_valid, muldiv_ready;
+    input  muldiv_valid;
+
+    output muldiv_ready;
     output ALU_zero;
     output [31 : 0] ALU_output;
 
     reg [31 : 0] ALU_output_reg;
-    assign ALU_zero = (!ALU_output_reg)[0];
+    reg muldiv_ready_reg;
+    assign ALU_zero = (!ALU_output_reg)[0]; //beq (in_1 - in_2 == 0) ? 1 : 0
     assign ALU_output = ALU_output_reg;
+    assign muldiv_ready = muldiv_ready_reg;
 
     mulDiv mulDiv(
         .clk(clk), 
         .rst_n(rst_n), 
-        .valid(muldiv_valid), 
-        .ready(muldiv_ready), 
-        .mode(ALUControl_op_input[0]), 
+        .valid(muldiv_valid),           //if valid == 0, mulDiv does nothing
+        .ready(muldiv_ready_reg), 
+        .mode(ALUControl_op_input),  //if (valid == 1) && (op_input == 4'b0110 or 4'b0111), mulDiv works
         .in_A(ALU_input_1), 
         .in_B(ALU_input_2), 
         .out(ALU_output_reg)
@@ -661,11 +670,26 @@ module ALU(
     always @(ALU_input_1, ALU_input_2, ALU_control_op_input)
     begin
         case(ALUControl_op_input)
-            4'b0001: ALU_output_reg = ALU_input_1 + ALU_input_2;
-            4'b0010: ALU_output_reg = ALU_input_1 - ALU_input_2;
-            4'b0011: ALU_output_reg = ALU_input_1 & ALU_input_2;
-            4'b0100: ALU_output_reg = ALU_input_1 | ALU_input_2;
-            4'b0101: ALU_output_reg = ALU_input_1 ^ ALU_input_2;
+            4'b0001: begin 
+                ALU_output_reg = ALU_input_1 + ALU_input_2;
+                // muldiv_ready_reg = 1;
+            end
+            4'b0010: begin
+                ALU_output_reg = ALU_input_1 - ALU_input_2;
+                // muldiv_ready_reg = 1;
+            end
+            4'b0011: begin
+                ALU_output_reg = ALU_input_1 & ALU_input_2;
+                // muldiv_ready_reg = 1;
+            end
+            4'b0100: begin
+                ALU_output_reg = ALU_input_1 | ALU_input_2;
+                // muldiv_ready_reg = 1;
+            end
+            4'b0101: begin
+                ALU_output_reg = ALU_input_1 ^ ALU_input_2;
+                // muldiv_ready_reg = 1;
+            end
         endcase
     end
 
@@ -673,7 +697,10 @@ module ALU(
     begin
         if (!rst_n) begin
             ALU_output_reg <= 0;
-            ALU_output_reg <= 0;
+            muldiv_ready_reg <= 0;
+        end
+        if (clk) begin
+            muldiv_ready_reg <= 0;
         end
     end
 
@@ -704,6 +731,7 @@ module MUX_3_to_1(
             2'b11: data_output_reg = 0;
         endcase
     end
+    
 endmodule
 
 
