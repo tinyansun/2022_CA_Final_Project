@@ -63,6 +63,7 @@ module CHIP(clk,
     
     wire Mem_Read_Write;
     wire [31 : 0] Mem_output;
+	wire [2 : 0] muldiv_valid;
 	//--------------------------------assign--------------------------------------------
 	
 	assign rs1 = mem_rdata_I[19 : 15];
@@ -200,6 +201,7 @@ module CHIP(clk,
 	
 	//----------------------------fsm---------------------------------------------
 	reg [5 : 0] counter;
+	reg [5 : 0] counter_nxt
 	reg [1 : 0] state;
 	reg [1 : 0] state_nxt;
 	parameter IDLE = 2'd0;
@@ -243,11 +245,11 @@ module CHIP(clk,
 			MULTIPLE : begin
 				if(counter == 32)begin
 					state_nxt = OUT;
-					valid = 1;
+					muldiv_valid = 1;
 				end
 				else begin
 					state_nxt = MULTIPLE;
-					valid = 0;
+					muldiv_valid = 0;
 				end
 			end
 			OUT : begin
