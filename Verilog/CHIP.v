@@ -727,10 +727,10 @@ module ALU(
     begin
         if (!rst_n) begin
             ALU_output_reg <= 0;
-            muldiv_ready_wire <= 0;
+            // muldiv_ready_wire <= 0;
         end
         if (clk) begin
-            muldiv_ready_wire <= 0;
+            // muldiv_ready_wire <= 0;
         end
     end
 
