@@ -532,7 +532,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     output        ready;
 
     input  [31:0] in_A, in_B;
-    output [63:0] out;
+    output [31:0] out;
 
     // Definition of states
     parameter IDLE = 2'd0;
@@ -549,7 +549,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
 
     // Todo 5: Wire assignments
     assign ready = (state == OUT) ? 1 : 0;
-    assign out = (state == OUT) ? shreg : 0;
+    assign out = (state == OUT) ? shreg[31:0] : 0;
 
     // Combinational always block
     // Todo 1: Next-state logic of state machine
