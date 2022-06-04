@@ -637,6 +637,17 @@ module ALU(
     assign ALU_zero = (!ALU_output_reg)[0];
     assign ALU_output = ALU_output_reg;
 
+    mulDiv mulDiv(
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .valid(muldiv_valid), 
+        .ready(muldiv_ready), 
+        .mode(ALUControl_op_input[0]), 
+        .in_A(ALU_input_1), 
+        .in_B(ALU_input_2), 
+        .out(ALU_output_reg)
+    );
+
     always @(ALU_input_1, ALU_input_2, ALU_control_op_input)
     begin
         case(ALUControl_op_input)
