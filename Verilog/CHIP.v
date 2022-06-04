@@ -203,12 +203,8 @@ module CHIP(clk,
 	
 	//----------------------------fsm---------------------------------------------
 	reg [5 : 0] counter;
-<<<<<<< HEAD
 	reg [5 : 0] counter_nxt
 	reg [1 : 0] state;
-=======
-	// reg [1 : 0] state;
->>>>>>> 29cbc9a20ac0eaf9dd97ef947357a90c35f424b1
 	reg [1 : 0] state_nxt;
 	parameter IDLE = 2'd0;
     parameter SINGLE  = 2'd1;
