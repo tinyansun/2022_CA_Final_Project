@@ -142,7 +142,43 @@ module CHIP(clk,
         .select_input(MemtoReg_control),
         .data_output(rd_data)           //register write data input
     );
+	
+	// MUX between PC+4 & PC shift left
+	MUX_2_to_1 MUX_PC(
+        .data1_input(PC_plusfour),
+        .data2_input(PC_shift),
+        .select_input(Branch_output & ALU_zero),
+        .data_output(PC_nxt)               
+    );
+	
+	//----------------------------fsm---------------------------------------------
+	always @(*) begin
+		case(state)
+			IDLE : begin
+				
+			end
+			SINGLE : begin
+				
+			end
+			MULTIPLE : begin
+			
+			end
+			OUT : begin
+			
+			end
+		endcase
+	end
+	
+//-----------------------------------PC_comb---------------------------------------
+	reg [31 : 0] PC_plusfour;
+	reg [31 : 0] PC_shift;
 
+	always@(*)begin
+		PC_plusfour = PC + 4;
+		PC_shift = PC + (imm_gen_output << 1);
+	end
+	
+//-----------------------------------PC_seq----------------------------------------
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
@@ -153,7 +189,9 @@ module CHIP(clk,
             
         end
     end
+	
 endmodule
+//--------------------------CHIP_module_end---------------------------------------------------------------------------------------
 
 module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
 
@@ -218,61 +256,61 @@ module Control
     jump_select_output
 );
 
-input  [6 : 0] Op_input;
-output [1 : 0] ALUOp_output;
-output         ALUSrc_output_1;
-output         ALUSrc_output_2;
-output         Branch_output;
-output         MemRead_output;
-output         MemWrite_output;
-output [1 : 0] MemtoReg_output;
-output         RegWrite_output;
-output         jump_select_output;
+	input  [6 : 0] Op_input;
+	output [1 : 0] ALUOp_output;
+	output         ALUSrc_output_1;
+	output         ALUSrc_output_2;
+	output         Branch_output;
+	output         MemRead_output;
+	output         MemWrite_output;
+	output [1 : 0] MemtoReg_output;
+	output         RegWrite_output;
+	output         jump_select_output;
 
-reg [1 : 0] ALUOp_reg;
-reg [1 : 0] MemtoReg_reg;
+	reg [1 : 0] ALUOp_reg;
+	reg [1 : 0] MemtoReg_reg;
 
-assign ALUOp_output = ALUOp_reg;
-assign ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
-assign ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
-assign Branch_output = (Op_input == 7'b1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
-assign MemRead_output = (Op_input == 7'b0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
-assign MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
-assign RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
-assign MemtoReg_output = MemtoReg_reg;                                                                                                                                                            // 7'b1100111 for jalr wb
-assign jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
+	assign ALUOp_output = ALUOp_reg;
+	assign ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
+	assign ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
+	assign Branch_output = (Op_input == 7'b1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
+	assign MemRead_output = (Op_input == 7'b0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
+	assign MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
+	assign RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
+	assign MemtoReg_output = MemtoReg_reg;                                                                                                                                                            // 7'b1100111 for jalr wb
+	assign jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
 
-always @(Op_input)
-begin
-    if (Op_i == 7'b0110011) // R-type inst, MUL, DIV, XOR
+	always @(Op_input)
 	begin
-		ALUOp_reg = 2'b10; 
-		MemtoReg_reg = 2'b00; // select ALU result to write data
+		if (Op_i == 7'b0110011) // R-type inst, MUL, DIV, XOR
+		begin
+			ALUOp_reg = 2'b10; 
+			MemtoReg_reg = 2'b00; // select ALU result to write data
+		end
+		else if (Op_i == 7'b0010011 || Op_i == 7'b0010111) // I-type inst, auipc, slti, srai
+		begin
+			ALUOp_reg = 2'b11;
+			MemtoReg_reg = 2'b00; // select ALU result to write data
+		end
+		else if (Op_i == 7'b0000011) // lw inst
+		begin
+			ALUOp_reg = 2'b00;
+			MemtoReg_reg = 2'b01; // select memory result to write data
+		end
+		else if (Op_i == 7'b0100011) // sw inst
+		begin
+			ALUOp_reg = 2'b00;
+		end
+		else if (Op_i == 7'b1100011) // beq inst
+		begin
+			ALUOp_reg = 2'b01;
+		end
+		else if (Op_i == 7'b1100111 || Op_i == 7'b1101111) // jalr, jal inst
+		begin
+			ALUOp_reg = 2'b11;    
+			MemtoReg_reg = 2'b10; // select PC+4 result to write data in register
+		end
 	end
-	else if (Op_i == 7'b0010011 || Op_i == 7'b0010111) // I-type inst, auipc, slti, srai
-	begin
-		ALUOp_reg = 2'b11;
-		MemtoReg_reg = 2'b00; // select ALU result to write data
-	end
-	else if (Op_i == 7'b0000011) // lw inst
-	begin
-		ALUOp_reg = 2'b00;
-		MemtoReg_reg = 2'b01; // select memory result to write data
-	end
-	else if (Op_i == 7'b0100011) // sw inst
-	begin
-		ALUOp_reg = 2'b00;
-	end
-	else if (Op_i == 7'b1100011) // beq inst
-	begin
-		ALUOp_reg = 2'b01;
-	end
-    else if (Op_i == 7'b1100111 || Op_i == 7'b1101111) // jalr, jal inst
-	begin
-        ALUOp_reg = 2'b11;    
-        MemtoReg_reg = 2'b10; // select PC+4 result to write data in register
-    end
-end
 
 
 endmodule
@@ -283,47 +321,47 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 	imm_output
 );
 
-input  [31 : 0] inst_input;
-output [31 : 0] imm_output;
+	input  [31 : 0] inst_input;
+	output [31 : 0] imm_output;
 
-reg [11 : 0] imm_reg;
-reg [31 : 0] imm_output_reg;
-assign imm_output = imm_output_reg;
+	reg [11 : 0] imm_reg;
+	reg [31 : 0] imm_output_reg;
+	assign imm_output = imm_output_reg;
 
-always @(inst_input)
-begin
-	if (inst_input[6 : 0] == 7'b0010011 || inst_input[6 : 0] == 7'b0000011 || inst_input[6 : 0] == 7'b1100111) // I-type, load, jalr
+	always @(inst_input)
 	begin
-		imm_reg[11 : 0] = inst_input[31 : 20];
-        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+		if (inst_input[6 : 0] == 7'b0010011 || inst_input[6 : 0] == 7'b0000011 || inst_input[6 : 0] == 7'b1100111) // I-type, load, jalr
+		begin
+			imm_reg[11 : 0] = inst_input[31 : 20];
+			imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+		end
+		else if (inst_input[6 : 0] == 7'b0100011) // store
+		begin
+			imm_reg[4 : 0] = inst_input[11 : 7];
+			imm_reg[11 : 5] = inst_input[31 : 25];
+			imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+		end
+		else if (inst_input[6 : 0] == 7'b1100011) // beq
+		begin
+			imm_reg[3 : 0] = inst_input[11 : 8];
+			imm_reg[9 : 4] = inst_input[30 : 25];
+			imm_reg[10] = inst_input[7];
+			imm_reg[11] = inst_input[31];
+			imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+		end
+		else if (inst_input[6 : 0] == 7'b0010111) // auipc
+		begin
+			imm_output_reg = {{12{inst_input[31]}} , inst_input[31 : 12]};
+		end
+		else if (inst_input[6 : 0] == 7'b1101111) // jal
+		begin
+			imm_reg[9 : 0] = inst_input[30 : 21];
+			imm_reg[10] = inst_input[20];
+			imm_reg[18 : 11] = inst_input[19 : 12];
+			imm_reg[19] = inst_input[31];
+			imm_output_reg = {{12{imm_reg[19]}} , imm_reg[19 : 0]};
+		end
 	end
-	else if (inst_input[6 : 0] == 7'b0100011) // store
-	begin
-		imm_reg[4 : 0] = inst_input[11 : 7];
-		imm_reg[11 : 5] = inst_input[31 : 25];
-        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
-	end
-	else if (inst_input[6 : 0] == 7'b1100011) // beq
-	begin
-		imm_reg[3 : 0] = inst_input[11 : 8];
-		imm_reg[9 : 4] = inst_input[30 : 25];
-		imm_reg[10] = inst_input[7];
-		imm_reg[11] = inst_input[31];
-        imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
-	end
-    else if (inst_input[6 : 0] == 7'b0010111) // auipc
-    begin
-        imm_output_reg = {{12{inst_input[31]}} , inst_input[31 : 12]};
-    end
-    else if (inst_input[6 : 0] == 7'b1101111) // jal
-    begin
-        imm_reg[9 : 0] = inst_input[30 : 21];
-		imm_reg[10] = inst_input[20];
-		imm_reg[18 : 11] = inst_input[19 : 12];
-		imm_reg[19] = inst_input[31];
-        imm_output_reg = {{12{imm_reg[19]}} , imm_reg[19 : 0]};
-    end
-end
 
 endmodule
 
@@ -335,12 +373,12 @@ module MUX_2_to_1
 	data_output
 );
 
-input  [31 : 0] data1_input;
-input  [31 : 0] data2_input;
-input           select_input;
-output [31 : 0] data_output;
+	input  [31 : 0] data1_input;
+	input  [31 : 0] data2_input;
+	input           select_input;
+	output [31 : 0] data_output;
 
-assign data_output = (select_input == 1'b0)? data1_input : data2_input;
+	assign data_output = (select_input == 1'b0)? data1_input : data2_input;
 
 endmodule
 
@@ -417,3 +455,8 @@ module MUX_3_to_1(
         endcase
     end
 endmodule
+
+
+	
+	
+
