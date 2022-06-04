@@ -266,10 +266,10 @@ module CHIP(clk,
 	always@(*)begin
 		case(state_nxt)
 			MULTIPLE : begin
-				counter_nxt <= counter+1;
+				counter_nxt = counter+1;
 			end
 			default:begin
-				counter_nxt <= counter;
+				counter_nxt = counter;
 			end
 		endcase
 	end
