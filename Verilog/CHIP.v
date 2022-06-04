@@ -33,7 +33,7 @@ module CHIP(clk,
     //---------------------------------------//
 
     //-------------------PC part----------------------------------------
-	wire PC_nxt_wire;
+	wire [31 : 0] PC_nxt_wire;
 	wire[31 : 0] mux_for_jump; // wire between two MUX
 	reg [31 : 0] PC_plusfour;
 	reg [31 : 0] PC_shift;
