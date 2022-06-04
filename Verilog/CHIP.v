@@ -74,7 +74,7 @@ module CHIP(clk,
 
 	//output
 	assign mem_wen_D = MemWrite_control;
-    assign mem_addr_D = ALU_output;
+    assign mem_addr_D = ALU_output; 
     assign mem_wdata_D = rs2;
 
     reg mem_addr_I_reg;
@@ -82,7 +82,7 @@ module CHIP(clk,
 
     reg [1 : 0] state;
     //---------------------------------wait for mul and div--------------------------------------------
-	always @(state)
+	always @(*)
     begin
         if (state == 2'd2)
         begin
