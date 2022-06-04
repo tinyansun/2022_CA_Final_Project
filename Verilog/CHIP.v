@@ -186,10 +186,12 @@ module CHIP(clk,
     );
 	
 	// MUX between PC+4 & PC shift left
+    wire branch_select;
+    assign branch_select = Branch_control & ALU_zero;
 	MUX_2_to_1 MUX_branch(
         .data1_input(PC_plusfour),
         .data2_input(PC_shift),
-        .select_input(Branch_output & ALU_zero),
+        .select_input(branch_select),
         .data_output(mux_for_jump)               
     );
 	
@@ -197,7 +199,7 @@ module CHIP(clk,
 	MUX_2_to_1 MUX_jump(
         .data1_input(mux_for_jump),
         .data2_input(jump_address),
-        .select_input(jump_select_output),
+        .select_input(jump_select),
         .data_output(PC_nxt_wire)               
     );
 	
