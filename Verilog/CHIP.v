@@ -129,18 +129,18 @@ module CHIP(clk,
 
     // MUX between register and ALU (for rs1 and PC)
     MUX_2_to_1 MUX_reg_to_ALU(
-        data1_input(rs1_data),
-        data2_input(PC),
-        select_input(ALUSrc_control_1),
-        data_output(ALU_input_1)                //ALU 1st input
+        .data1_input(rs1_data),
+        .data2_input(PC),
+        .select_input(ALUSrc_control_1),
+        .data_output(ALU_input_1)                //ALU 1st input
     );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
     MUX_2_to_1 MUX_reg_to_ALU(
-        data1_input(rs2_data),
-        data2_input(imm_gen_output),
-        select_input(ALUSrc_control_2),
-        data_output(ALU_input_2)                //ALU 2nd input
+        .data1_input(rs2_data),
+        .data2_input(imm_gen_output),
+        .select_input(ALUSrc_control_2),
+        .data_output(ALU_input_2)                //ALU 2nd input
     );
 
     // ALU Control
