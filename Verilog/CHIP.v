@@ -42,15 +42,15 @@ module CHIP(clk,
 	
 	//-------------------PC_end-----------------------------------------
     
-    reg Branch_control;
-    reg MemRead_control;
-    reg MemWrite_control;
-	reg  [1 : 0] MemtoReg_control;
-    reg  [1 : 0] MemtoReg_control_reg;
-    reg  [1 : 0] ALUOp_control;
-    reg ALUSrc_control_1;
-    reg ALUSrc_control_2;
-    reg jump_select;
+    wire Branch_control;
+    wire MemRead_control;
+    wire MemWrite_control;
+	wire  [1 : 0] MemtoReg_control;
+    wire  [1 : 0] MemtoReg_control_reg;
+    wire  [1 : 0] ALUOp_control;
+    wire ALUSrc_control_1;
+    wire ALUSrc_control_2;
+    wire jump_select;
 	
     wire [31 : 0] imm_gen_output;
 	
