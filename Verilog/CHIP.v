@@ -688,7 +688,7 @@ module ALU(
         .clk(clk), 
         .rst_n(rst_n), 
         .valid(muldiv_valid),           //if valid == 0, mulDiv does nothing
-        .ready(muldiv_ready_reg), 
+        .ready(muldiv_ready_wire), 
         .mode(ALU_control_op_input),  //if (valid == 1) && (op_input == 4'b0110 or 4'b0111), mulDiv works
         .in_A(ALU_input_1), 
         .in_B(ALU_input_2), 
@@ -727,10 +727,10 @@ module ALU(
     begin
         if (!rst_n) begin
             ALU_output_reg <= 0;
-            muldiv_ready_reg <= 0;
+            muldiv_ready_wire <= 0;
         end
         if (clk) begin
-            muldiv_ready_reg <= 0;
+            muldiv_ready_wire <= 0;
         end
     end
 
