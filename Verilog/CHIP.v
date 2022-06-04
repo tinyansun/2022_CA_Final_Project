@@ -199,7 +199,7 @@ module CHIP(clk,
 	// MUX for jump decision
 	MUX_2_to_1 MUX_jump(
         .data1_input(mux_for_jump),
-        .data2_input(jump_address),
+        .data2_input(ALU_output),
         .select_input(jump_select),
         .data_output(PC_nxt_wire)               
     );
