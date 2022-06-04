@@ -69,6 +69,8 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
+<<<<<<< HEAD
+=======
 
 	//output
 	assign mem_wen_D = MemWrite_control;
@@ -76,6 +78,7 @@ module CHIP(clk,
     assign mem_wdata_D = rs2;
 	
 
+>>>>>>> 2b19d3b7431b4a9c109b721b5d09f44f4dc42ff3
 
     reg mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
@@ -129,18 +132,18 @@ module CHIP(clk,
 
     // MUX between register and ALU (for rs1 and PC)
     MUX_2_to_1 MUX_reg_to_ALU(
-        data1_input(rs1_data),
-        data2_input(PC),
-        select_input(ALUSrc_control_1),
-        data_output(ALU_input_1)                //ALU 1st input
+        .data1_input(rs1_data),
+        .data2_input(PC),
+        .select_input(ALUSrc_control_1),
+        .data_output(ALU_input_1)                //ALU 1st input
     );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
     MUX_2_to_1 MUX_reg_to_ALU(
-        data1_input(rs2_data),
-        data2_input(imm_gen_output),
-        select_input(ALUSrc_control_2),
-        data_output(ALU_input_2)                //ALU 2nd input
+        .data1_input(rs2_data),
+        .data2_input(imm_gen_output),
+        .select_input(ALUSrc_control_2),
+        .data_output(ALU_input_2)                //ALU 2nd input
     );
 
     // ALU Control
@@ -387,7 +390,7 @@ begin
     MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
     RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
                                                                                                                                                                                                 // 7'b1100111 for jalr wb
-    jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
+    jump_select_output = (Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
     // ----------------------------------------------------------------------------------------------------
     if (Op_input == 7'b0110011) // R-type inst, MUL, DIV, XOR
     begin
