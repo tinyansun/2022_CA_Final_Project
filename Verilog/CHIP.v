@@ -109,7 +109,7 @@ module CHIP(clk,
 
     // Todo: any combinational/sequential circuit
 
-    Control Control(
+    Control Control (
         .Op_input(mem_rdata_I[6 : 0]),
         .Branch_output(Branch_control),
         .MemRead_output(MemRead_control),
