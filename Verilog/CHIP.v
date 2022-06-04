@@ -90,7 +90,7 @@ module CHIP(clk,
         begin
             mem_addr_I_reg = PC;
         end
-    
+    end
 	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -107,7 +107,7 @@ module CHIP(clk,
 
     // Todo: any combinational/sequential circuit
 
-    Control Control(
+    Control Control (
         .Op_input(mem_rdata_I[6 : 0]),
         .Branch_output(Branch_control),
         .MemRead_output(MemRead_control),
