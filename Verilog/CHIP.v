@@ -34,7 +34,7 @@ module CHIP(clk,
 
     //-------------------PC part----------------------------------------
 	
-	wire mux_for_jump; // wire between two MUX
+	wire[31 : 0] mux_for_jump; // wire between two MUX
 	reg [31 : 0] PC_plusfour;
 	reg [31 : 0] PC_shift;
 	reg [31 : 0] jump_address;
