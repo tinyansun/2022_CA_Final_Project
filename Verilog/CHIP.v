@@ -210,7 +210,7 @@ module CHIP(clk,
 	always @(*) begin
 		case(state)
 			IDLE : begin
-				case(ALU_operation)begin
+				case(ALU_operation)
 					1 : begin
 						state_nxt = SINGLE;
 					end
