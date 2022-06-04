@@ -185,18 +185,30 @@ module CHIP(clk,
 	always @(*) begin
 		case(state)
 			IDLE : begin
-				case(ALUControl_output)begin
-					0 : begin
-					
-					end
+				case(ALU_operation)begin
 					1 : begin
-					
+						state_nxt = SINGLE;
 					end
 					2 : begin
-					
+						state_nxt = SINGLE;
 					end
 					3 : begin
-					
+						state_nxt = SINGLE;
+					end
+					4 : begin
+						state_nxt = SINGLE;
+					end
+					5 : begin
+						state_nxt = SINGLE;
+					end
+					6 : begin
+						state_nxt = MULTIPLE;
+					end
+					7 : begin
+						state_nxt = MULTIPLE;
+					end
+					default : begin
+						state_nxt = state;
 					end
 				endcase
 			end
@@ -206,9 +218,11 @@ module CHIP(clk,
 			MULTIPLE : begin
 				if(counter == 32)begin
 					state_nxt = OUT;
+					valid = 1;
 				end
 				else begin
 					state_nxt = MULTIPLE;
+					valid = 0;
 				end
 			end
 			OUT : begin
