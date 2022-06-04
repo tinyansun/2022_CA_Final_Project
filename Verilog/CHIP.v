@@ -87,7 +87,7 @@ module CHIP(clk,
         if (state == 2'd2)
         begin
             mem_addr_I_reg = 32'h00010000;
-            PC <= PC_nxt - 4;
+            PC_nxt = PC_nxt - 4;
         end
         else
         begin
