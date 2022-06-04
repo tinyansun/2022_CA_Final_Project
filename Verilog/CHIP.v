@@ -138,7 +138,7 @@ module CHIP(clk,
     );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
-    MUX_2_to_1 MUX_reg_to_ALU(
+    MUX_2_to_1 MUX_reg_to_ALU_1(
         .data1_input(rs2_data),
         .data2_input(imm_gen_output),
         .select_input(ALUSrc_control_2),
@@ -203,7 +203,7 @@ module CHIP(clk,
 	
 	//----------------------------fsm---------------------------------------------
 	reg [5 : 0] counter;
-	reg [5 : 0] counter_nxt
+	reg [5 : 0] counter_nxt;
 	reg [1 : 0] state;
 	reg [1 : 0] state_nxt;
 	parameter IDLE = 2'd0;
