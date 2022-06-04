@@ -68,7 +68,7 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-    
+
     reg mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
     //---------------------------------wait for mul and div--------------------------------------------
@@ -77,6 +77,7 @@ module CHIP(clk,
         if (state == 2'd2)
         begin
             mem_addr_I_reg = 32'h00010000;
+            PC <= PC_nxt - 4;
         end
         else
         begin
@@ -198,14 +199,7 @@ module CHIP(clk,
 	always @(*) begin
 		case(state)
 			IDLE : begin
-<<<<<<< HEAD
-				case(ALUControl_output)begin
-					0 : begin
-
-					end
-=======
 				case(ALU_operation)begin
->>>>>>> c1635ec80b361c811540d7c0e72d2059e537f385
 					1 : begin
 						state_nxt = SINGLE;
 					end
