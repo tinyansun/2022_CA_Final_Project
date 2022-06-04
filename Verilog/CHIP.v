@@ -138,7 +138,7 @@ module CHIP(clk,
     MUX_3_to_1 MUX_mem_to_reg(
         .data1_input(ALU_output),
         .data2_input(Mem_output),
-        .data3_input(),                 //PC+4
+        .data3_input(PC_plusfour),                 //PC+4
         .select_input(MemtoReg_control),
         .data_output(rd_data)           //register write data input
     );
@@ -261,11 +261,6 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
                 mem[i] <= mem_nxt[i];
         end
     end
-endmodule
-
-module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
-    // Todo: your HW2
-
 endmodule
 
 module Control
@@ -413,10 +408,9 @@ module ALU_Control(
     ALUControl_instruction_input,
     ALUControl_output
 );
-    
-    input  [1:0] ALUControl_op_input;
-    input  [3:0] ALUControl_op_func7_func3;
-    output [3:0] ALUControl_output;
+    input  [1 : 0] ALUControl_op_input;
+    input  [31 : 0] ALUControl_instruction_input;
+    output [3 : 0] ALUControl_output;
 
     reg  [3 : 0] ALUControl_output_reg;
     assign ALUControl_output = ALUControl_output_reg;
@@ -424,34 +418,197 @@ module ALU_Control(
     always @(ALUControl_op_input or ALUControl_instruction_input)
     begin
         case(ALUControl_op_input)
-            2'b00: ALUControl_output_reg = 4'b0010;//ld,sd add
-            2'b01: ALUControl_output_reg = 4'b0110;//bq    subtract
+            2'b00: ALUControl_output_reg = 4'b0001;//ld,sd add
+            2'b01: ALUControl_output_reg = 4'b0010;//bq    subtract
             2'b10: begin
                 //Rtype add/sub/AND/OR
-                if      ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0000) ALUControl_output_reg = 4'b0010;//add
-                else if ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b1000) ALUControl_output_reg = 4'b0110;//subtract
-                else if ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0111) ALUControl_output_reg = 4'b0000;//AND
-                else    ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0110) ALUControl_output_reg = 4'b0001;//OR
+                if      ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000000) ALUControl_output_reg = 4'b0001;//add
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0100000000) ALUControl_output_reg = 4'b0010;//subtract
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000111) ALUControl_output_reg = 4'b0011;//AND
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000110) ALUControl_output_reg = 4'b0100;//OR
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000100) ALUControl_output_reg = 4'b0101;//XOR
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001000) ALUControl_output_reg = 4'b0110;//MUL
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
             end
-            2'b11: //Itype ???
+            2'b11: ALUControl_output_reg = 4'b0001;//Itype add???
         endcase
     end
 
 endmodule
 
+module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
+    // Todo: your HW2
+    // Definition of ports
+    input         clk, rst_n;
+    input         valid;
+    input         mode; // mode: 0: mulu, 1: divu, //2: and, 3: avg
+    output        ready;
+
+    input  [31:0] in_A, in_B;
+    output [63:0] out;
+
+    // Definition of states
+    parameter IDLE = 2'd0;
+    parameter MUL  = 2'd1;
+    parameter DIV  = 2'd2;
+    parameter OUT  = 2'd3;
+
+    // Todo: Wire and reg if needed
+    reg  [ 2:0] state, state_nxt;
+    reg  [ 4:0] counter, counter_nxt;
+    reg  [63:0] shreg, shreg_nxt;
+    reg  [31:0] alu_in, alu_in_nxt;
+    reg  [32:0] alu_out;
+
+    // Todo 5: Wire assignments
+    assign ready = (state == OUT) ? 1 : 0;
+    assign out = (state == OUT) ? shreg : 0;
+
+    // Combinational always block
+    // Todo 1: Next-state logic of state machine
+    always @(*) begin
+        case(state)
+            IDLE: begin
+                if (valid == 0) state_nxt = state;
+                else begin
+                    case(mode)
+                        1'b0: state_nxt = MUL;
+                        1'b1: state_nxt = DIV;
+                        default: state_nxt = IDLE;
+                    endcase
+                end
+            end
+            MUL : begin
+                if (counter != 31) state_nxt = MUL;
+                else               state_nxt = OUT;
+            end
+            DIV : begin
+                if (counter != 31) state_nxt = DIV;
+                else               state_nxt = OUT;
+            end
+            OUT : state_nxt = IDLE;
+            default : state_nxt = state;
+        endcase
+    end
+
+    // Todo 2: Counter
+    always @(*) begin
+        if (state == MUL || state == DIV) counter_nxt = counter + 1;
+        else                              counter_nxt = 0;
+    end
+
+    // ALU input
+    always @(*) begin
+        case(state)
+            IDLE: begin
+                if (valid) alu_in_nxt = in_B;
+                else       alu_in_nxt = 0;
+            end
+            OUT : alu_in_nxt = 0;
+            default: alu_in_nxt = alu_in;
+        endcase
+    end
+
+    // Todo 3: ALU output
+    always @(*) begin
+        case(state)
+            IDLE: alu_out = 0;
+            MUL: begin
+                if (shreg[0] == 1) alu_out = {33'b0} + (alu_in + shreg[63:32]);
+                else               alu_out = {1'b0,shreg[63:32]};
+            end
+            DIV: begin
+                if (shreg[63:32] >= alu_in) alu_out = {1'b1,shreg[63:32]-alu_in};
+                else                        alu_out = {1'b0,shreg[63:32]};
+            end
+            OUT: alu_out = 0;
+            default: alu_out = 0;
+        endcase
+    end
+
+    // Todo 4: Shift register
+    always @(*) begin
+        case(state)
+            IDLE: begin
+                if (valid) shreg_nxt = {32'b0,in_A};
+                else       shreg_nxt = 0;
+            end
+            MUL: shreg_nxt = ({32'b0,shreg[31:0]} >> 1) + {alu_out,31'b0};
+            DIV: begin
+                if (alu_out[32] == 0) shreg_nxt = shreg << 1;
+                else                  shreg_nxt = ({alu_out[31:0],shreg[31:0]} << 1) + {64'b1};
+                if (counter == 31) begin
+                    if (shreg_nxt[63:32] >= alu_in) begin
+                        shreg_nxt[63:32] = shreg_nxt[63:32] - alu_in;
+                        shreg_nxt[31:0] = (shreg_nxt[31:0] << 1) + {32'b1};
+                    end
+                    else shreg_nxt[31:0] = (shreg_nxt[31:0] << 1) + {32'b0};
+                end
+            end
+            OUT: shreg_nxt = 0;
+            default: shreg_nxt = 0;
+        endcase
+    end
+
+    // Todo: Sequential always block
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+            counter <= 0;
+            shreg <= 0;
+        end
+        else begin
+            state <= state_nxt;
+            counter <= counter_nxt;
+            alu_in <= alu_in_nxt;
+            shreg <= shreg_nxt;
+        end
+    end
+
+endmodule
+
 module ALU(
+    clk,
+    rst_n,
     ALU_input_1,
     ALU_input_2,
     ALU_control_op_input,
+    muldiv_valid,
+    muldiv_ready,
     ALU_zero,
     ALU_output
 );
-    
+
+    input clk, rst_n;    
     input  [31 : 0] ALU_input_1;
     input  [31 : 0] ALU_input_2;
     input  [3 : 0] ALU_control_op_input;
+    input  muldiv_valid, muldiv_ready;
     output ALU_zero;
     output [31 : 0] ALU_output;
+
+    reg [31 : 0] ALU_output_reg;
+    assign ALU_zero = (!ALU_output_reg)[0];
+    assign ALU_output = ALU_output_reg;
+
+    always @(ALU_input_1, ALU_input_2, ALU_control_op_input)
+    begin
+        case(ALUControl_op_input)
+            4'b0001: ALU_output_reg = ALU_input_1 + ALU_input_2;
+            4'b0010: ALU_output_reg = ALU_input_1 - ALU_input_2;
+            4'b0011: ALU_output_reg = ALU_input_1 & ALU_input_2;
+            4'b0100: ALU_output_reg = ALU_input_1 | ALU_input_2;
+            4'b0101: ALU_output_reg = ALU_input_1 ^ ALU_input_2;
+        endcase
+    end
+
+    always @(posedge clk or negedge rst_n)
+    begin
+        if (!rst_n) begin
+            ALU_output_reg <= 0;
+            ALU_output_reg <= 0;
+        end
+    end
 
 endmodule
 
