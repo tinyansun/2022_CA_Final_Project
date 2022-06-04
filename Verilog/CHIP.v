@@ -46,6 +46,16 @@ module CHIP(clk,
     wire jump_select;
 
     wire [31 : 0] imm_gen_output;
+
+    reg  [3 : 0] ALU_operation;
+    wire [31 : 0] ALU_input_1;
+    wire [31 : 0] ALU_input_2;
+    wire ALU_zero;
+    wire [31 : 0] ALU_output;
+    
+    wire Mem_Read_Write;
+    wire [31 : 0] Mem_output;
+    assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
     //---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -86,7 +96,7 @@ module CHIP(clk,
         data1_input(rs1_data),
         data2_input(PC),
         select_input(ALUSrc_control_1),
-        data_output()                //ALU 1st input
+        data_output(ALU_input_1)                //ALU 1st input
     );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
@@ -94,9 +104,44 @@ module CHIP(clk,
         data1_input(rs2_data),
         data2_input(imm_gen_output),
         select_input(ALUSrc_control_2),
-        data_output()                //ALU 2nd input
+        data_output(ALU_input_2)                //ALU 2nd input
     );
 
+    // ALU Control
+    ALU_Control ALU_Control(
+        .ALUControl_op_input(ALUOp_control),
+        .ALUControl_instruction_input(instruction[31 : 0]),
+        .ALUControl_output(ALU_operation)   //ALU_control_op_input
+    );
+
+    // ALU
+    ALU ALU(
+        .ALU_input_1(ALU_input_1),
+        .ALU_input_2(ALU_input_2),
+        .ALU_control_op_input(ALU_operation),
+        .ALU_zero(ALU_zero),
+        .ALU_output(ALU_output)
+    );
+
+    // memory
+    memory memory(
+        .clk(clk),
+        .rst_n(rst_n),
+        .wen(Mem_Read_Write_control),   //0: read; 1: write
+        .a(ALU_output),
+        .d(rs2_data),
+        .q(Mem_output),                 //memory data output
+        .offset()
+    );
+
+    // MUX between memory and register (for ALU output and read data from memory)
+    MUX_3_to_1 MUX_mem_to_reg(
+        .data1_input(ALU_output),
+        .data2_input(Mem_output),
+        .data3_input(),                 //PC+4
+        .select_input(MemtoReg_control),
+        .data_output(rd_data)           //register write data input
+    );
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -299,3 +344,76 @@ assign data_output = (select_input == 1'b0)? data1_input : data2_input;
 
 endmodule
 
+module ALU_Control(
+    ALUControl_op_input,
+    ALUControl_instruction_input,
+    ALUControl_output
+);
+    
+    input  [1:0] ALUControl_op_input;
+    input  [3:0] ALUControl_op_func7_func3;
+    output [3:0] ALUControl_output;
+
+    reg  [3 : 0] ALUControl_output_reg;
+    assign ALUControl_output = ALUControl_output_reg;
+
+    always @(ALUControl_op_input or ALUControl_instruction_input)
+    begin
+        case(ALUControl_op_input)
+            2'b00: ALUControl_output_reg = 4'b0010;//ld,sd add
+            2'b01: ALUControl_output_reg = 4'b0110;//bq    subtract
+            2'b10: begin
+                //Rtype add/sub/AND/OR
+                if      ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0000) ALUControl_output_reg = 4'b0010;//add
+                else if ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b1000) ALUControl_output_reg = 4'b0110;//subtract
+                else if ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0111) ALUControl_output_reg = 4'b0000;//AND
+                else    ({ALUControl_instruction_input[30],ALUControl_instruction_input[14:12]} == 4'b0110) ALUControl_output_reg = 4'b0001;//OR
+            end
+            2'b11: //Itype ???
+        endcase
+    end
+
+endmodule
+
+module ALU(
+    ALU_input_1,
+    ALU_input_2,
+    ALU_control_op_input,
+    ALU_zero,
+    ALU_output
+);
+    
+    input  [31 : 0] ALU_input_1;
+    input  [31 : 0] ALU_input_2;
+    input  [3 : 0] ALU_control_op_input;
+    output ALU_zero;
+    output [31 : 0] ALU_output;
+
+endmodule
+
+module MUX_3_to_1(
+    data1_input,
+    data2_input,
+    data3_input,
+    select_input,
+    data_output
+);
+
+    input  [31 : 0] data1_input;
+    input  [31 : 0] data2_input;
+    input  [31 : 0] data3_input;
+    input  [1 : 0]  select_input;
+    output [31 : 0] data_output;
+
+    reg [31 : 0] data_output_reg;
+    assign data_output = data_output_reg;
+
+    always @(data1_input, data2_input, data3_input, select_input) begin
+        case(select_input)
+            2'b00: data_output_reg = data1_input;
+            2'b01: data_output_reg = data2_input;
+            2'b10: data_output_reg = data3_input;
+            2'b11: data_output_reg = 0;
+        endcase
+    end
+endmodule
