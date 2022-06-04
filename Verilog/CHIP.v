@@ -73,7 +73,7 @@ module CHIP(clk,
         .ALUSrc_output_2(ALUSrc_control_2),
         .RegWrite_output(regWrite),
         .jump_select_output(jump_select)
-    )
+    );
 
     // Imm Gen (32 bits in, 32 bits out)
     Sign_Extend Sign_Extend(
@@ -87,7 +87,7 @@ module CHIP(clk,
         data2_input(PC),
         select_input(ALUSrc_control_1),
         data_output()                //ALU 1st input
-    )
+    );
 
     // MUX between register and ALU (for rs2 and imm_gen output)
     MUX_2_to_1 MUX_reg_to_ALU(
@@ -95,7 +95,7 @@ module CHIP(clk,
         data2_input(imm_gen_output),
         select_input(ALUSrc_control_2),
         data_output()                //ALU 2nd input
-    )
+    );
 
 
     always @(posedge clk or negedge rst_n) begin
@@ -170,7 +170,7 @@ module Control
     ALUSrc_output_1,
 	ALUSrc_output_2,
 	RegWrite_output,
-    jalr_select_output
+    jump_select_output
 );
 
 input  [6 : 0] Op_input;
@@ -190,9 +190,9 @@ reg [1 : 0] MemtoReg_reg;
 assign ALUOp_output = ALUOp_reg;
 assign ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
 assign ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
-assign Branch_output = (Op_input == 7'1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
-assign MemRead_output = (Op_input == 7'0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
-assign MemWrite_output = (Op_input == 7'0100011)? 1'b1 : 1'b0;
+assign Branch_output = (Op_input == 7'b1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
+assign MemRead_output = (Op_input == 7'b0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
+assign MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
 assign RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
 assign MemtoReg_output = MemtoReg_reg;                                                                                                                                                            // 7'b1100111 for jalr wb
 assign jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
