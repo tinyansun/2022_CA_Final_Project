@@ -69,16 +69,12 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-<<<<<<< HEAD
-=======
+
 
 	//output
 	assign mem_wen_D = MemWrite_control;
     assign mem_addr_D = ALU_output;
     assign mem_wdata_D = rs2;
-	
-
->>>>>>> 2b19d3b7431b4a9c109b721b5d09f44f4dc42ff3
 
     reg mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
