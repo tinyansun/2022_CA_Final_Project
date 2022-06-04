@@ -78,6 +78,8 @@ module CHIP(clk,
 
     reg mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
+
+    reg [1 : 0] state;
     //---------------------------------wait for mul and div--------------------------------------------
 	always @(state)
     begin
@@ -90,7 +92,7 @@ module CHIP(clk,
         begin
             mem_addr_I_reg = PC;
         end
-    
+    end
 	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -200,7 +202,7 @@ module CHIP(clk,
 	
 	//----------------------------fsm---------------------------------------------
 	reg [5 : 0] counter;
-	reg [1 : 0] state;
+	// reg [1 : 0] state;
 	reg [1 : 0] state_nxt;
 	parameter IDLE = 2'd0;
     parameter SINGLE  = 2'd1;
@@ -210,7 +212,7 @@ module CHIP(clk,
 	always @(*) begin
 		case(state)
 			IDLE : begin
-				case(ALU_operation)begin
+				case(ALU_operation)
 					1 : begin
 						state_nxt = SINGLE;
 					end
