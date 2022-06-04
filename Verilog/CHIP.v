@@ -152,19 +152,45 @@ module CHIP(clk,
     );
 	
 	//----------------------------fsm---------------------------------------------
+	reg [5 : 0] counter;
+	reg [1 : 0] state;
+	reg [1 : 0] state_nxt;
+	parameter IDLE = 2'd0;
+    parameter SINGLE  = 2'd1;
+    parameter MULTIPLE  = 2'd2;
+    parameter OUT = 2'd3;
+	
 	always @(*) begin
 		case(state)
 			IDLE : begin
-				
+				case(ALUControl_output)begin
+					0 : begin
+					
+					end
+					1 : begin
+					
+					end
+					2 : begin
+					
+					end
+					3 : begin
+					
+					end
+				endcase
 			end
 			SINGLE : begin
-				
+				state_nxt = OUT;
 			end
 			MULTIPLE : begin
-			
+				if(counter == 32)begin
+					state_nxt = OUT;
+				end
+				else begin
+					state_nxt = MULTIPLE;
+				end
 			end
 			OUT : begin
-			
+				state_nxt = IDLE;
 			end
 		endcase
 	end
@@ -182,11 +208,11 @@ module CHIP(clk,
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
-            
+            state <= IDLE;
         end
         else begin
             PC <= PC_nxt;
-            
+            state <= state_nxt;
         end
     end
 	
