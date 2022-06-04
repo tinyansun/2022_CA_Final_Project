@@ -68,8 +68,21 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-    assign mem_addr_I = PC;
-	
+    
+    reg mem_addr_I_reg;
+    assign mem_addr_I = mem_addr_I_reg;
+    //---------------------------------wait for mul and div--------------------------------------------
+	always @(state)
+    begin
+        if (state == 2'd2)
+        begin
+            mem_addr_I_reg = 32'h00010000;
+        end
+        else
+        begin
+            mem_addr_I_reg = PC;
+        end
+    
 	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -187,7 +200,7 @@ module CHIP(clk,
 			IDLE : begin
 				case(ALUControl_output)begin
 					0 : begin
-					
+
 					end
 					1 : begin
 					
@@ -312,6 +325,7 @@ endmodule
 module Control
 (   clk,
     rst_n,
+    state,
     Op_input,
     Branch_output,
     MemRead_output,
@@ -339,54 +353,44 @@ output reg jump_select_output;
 
 always @(*)
 begin
-    if (!rst_n)
+    ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
+    ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
+    Branch_output = (Op_input == 7'b1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
+    MemRead_output = (Op_input == 7'b0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
+    MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
+    RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
+                                                                                                                                                                                                // 7'b1100111 for jalr wb
+    jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
+    // ----------------------------------------------------------------------------------------------------
+    if (Op_input == 7'b0110011) // R-type inst, MUL, DIV, XOR
     begin
-
+        ALUOp_output = 2'b10; 
+        MemtoReg_output = 2'b00; // select ALU result to write data
     end
-    else if (state == 2'd2)
+    else if (Op_input == 7'b0010011 || Op_input == 7'b0010111) // I-type inst, auipc, slti, srai
     begin
-        
+        ALUOp_output = 2'b11;
+        MemtoReg_output = 2'b00; // select ALU result to write data
     end
-    else
+    else if (Op_input == 7'b0000011) // lw inst
     begin
-        ALUSrc_output_1 = (Op_input == 7'b0010111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for auipc and jal accessing PC
-        ALUSrc_output_2 = (Op_input == 7'b0000011 || Op_input == 7'b0100011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc accessing imm
-        Branch_output = (Op_input == 7'b1100011)? 1'b1 : 1'b0;                                                                                                                                      // 7'b1100111 for jalr accessing imm
-        MemRead_output = (Op_input == 7'b0000011)? 1'b1 : 1'b0;                                                                                                                                     // 7'b1101111 for jal accessing imm
-        MemWrite_output = (Op_input == 7'b0100011)? 1'b1 : 1'b0;
-        RegWrite_output = (Op_input == 7'b0000011 || Op_input == 7'b0110011 || Op_input == 7'b0010011 || Op_input == 7'b0010111 || Op_input == 7'b1100111 || Op_input == 7'b1101111)? 1'b1 : 1'b0; // 7'b0010111 for auipc wb
-                                                                                                                                                                                                   // 7'b1100111 for jalr wb
-        jump_select_output = (Op_input == 7'b1100111 || || Op_input == 7'b1101111)? 1'b1 : 1'b0; // for jalr and jal setting PC = rs1 + imm or PC = PC + offset                                    // 7'b1101111 for jal wb
-        // ----------------------------------------------------------------------------------------------------
-        if (Op_input == 7'b0110011) // R-type inst, MUL, DIV, XOR
-        begin
-            ALUOp_output = 2'b10; 
-            MemtoReg_output = 2'b00; // select ALU result to write data
-        end
-        else if (Op_input == 7'b0010011 || Op_input == 7'b0010111) // I-type inst, auipc, slti, srai
-        begin
-            ALUOp_output = 2'b11;
-            MemtoReg_output = 2'b00; // select ALU result to write data
-        end
-        else if (Op_input == 7'b0000011) // lw inst
-        begin
-            ALUOp_output = 2'b00;
-            MemtoReg_output = 2'b01; // select memory result to write data
-        end
-        else if (Op_input == 7'b0100011) // sw inst
-        begin
-            ALUOp_output = 2'b00;
-        end
-        else if (Op_input == 7'b1100011) // beq inst
-        begin
-            ALUOp_output = 2'b01;
-        end
-        else if (Op_input == 7'b1100111 || Op_input == 7'b1101111) // jalr, jal inst
-        begin
-            ALUOp_output = 2'b11;    
-            MemtoReg_output = 2'b10; // select PC+4 result to write data in register
-        end
+        ALUOp_output = 2'b00;
+        MemtoReg_output = 2'b01; // select memory result to write data
     end
+    else if (Op_input == 7'b0100011) // sw inst
+    begin
+        ALUOp_output = 2'b00;
+    end
+    else if (Op_input == 7'b1100011) // beq inst
+    begin
+        ALUOp_output = 2'b01;
+    end
+    else if (Op_input == 7'b1100111 || Op_input == 7'b1101111) // jalr, jal inst
+    begin
+        ALUOp_output = 2'b11;    
+        MemtoReg_output = 2'b10; // select PC+4 result to write data in register
+    end
+    
 end
 
 
