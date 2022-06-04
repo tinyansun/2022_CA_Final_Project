@@ -45,7 +45,7 @@ module CHIP(clk,
     wire Branch_control;
     wire MemRead_control;
     wire MemWrite_control;
-	reg  [31 : 0] instruction;
+	
     reg  [1 : 0] MemtoReg_control;
     reg  [1 : 0] ALUOp_control;
     wire ALUSrc_control_1;
@@ -64,11 +64,12 @@ module CHIP(clk,
     wire [31 : 0] Mem_output;
 	//--------------------------------assign--------------------------------------------
 	
-	assign rs1 = instruction[19 : 15];
-    assign rs2 = instruction[24 : 20];
-    assign rd = instruction[11 : 7];
+	assign rs1 = mem_rdata_I[19 : 15];
+    assign rs2 = mem_rdata_I[24 : 20];
+    assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-    
+    assign mem_addr_I = PC;
+	
 	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -242,7 +243,7 @@ module CHIP(clk,
 			jump_address[i] = PC_plusfour[i];
 		end
 		for(i=0; i<=25; i=i+1)begin
-			jump_address[i+2] = instruction[i];
+			jump_address[i+2] = mem_rdata_I[i];
 		end
 		for(i=0; i<=1; i=i+1)begin
 			jump_address[i] = 0;
