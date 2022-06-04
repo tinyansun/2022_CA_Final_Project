@@ -266,10 +266,10 @@ module CHIP(clk,
 	always@(*)begin
 		case(state_nxt)
 			MULTIPLE : begin
-				counter_nxt = counter+1;
+				counter_nxt <= counter+1;
 			end
 			default:begin
-				counter_nxt = 0;
+				counter_nxt <= counter;
 			end
 		endcase
 	end
@@ -297,10 +297,12 @@ module CHIP(clk,
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
             state <= IDLE;
+			counter <= 0;
         end
         else begin
             PC <= PC_nxt;
             state <= state_nxt;
+			counter <= counter_nxt;
         end
     end
 	
