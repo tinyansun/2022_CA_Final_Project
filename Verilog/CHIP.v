@@ -42,15 +42,15 @@ module CHIP(clk,
 	
 	//-------------------PC_end-----------------------------------------
     
-    wire Branch_control;
-    wire MemRead_control;
-    wire MemWrite_control;
-	
-    reg  [1 : 0] MemtoReg_control;
+    reg Branch_control;
+    reg MemRead_control;
+    reg MemWrite_control;
+	reg  [1 : 0] MemtoReg_control;
+    reg  [1 : 0] MemtoReg_control_reg;
     reg  [1 : 0] ALUOp_control;
-    wire ALUSrc_control_1;
-    wire ALUSrc_control_2;
-    wire jump_select;
+    reg ALUSrc_control_1;
+    reg ALUSrc_control_2;
+    reg jump_select;
 	
     wire [31 : 0] imm_gen_output;
 	
@@ -87,7 +87,7 @@ module CHIP(clk,
         if (state == 2'd2)
         begin
             mem_addr_I_reg = 32'h00010000;
-            PC <= PC_nxt - 4;
+            PC_nxt = PC_nxt - 4;
         end
         else
         begin
