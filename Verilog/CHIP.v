@@ -179,7 +179,7 @@ module CHIP(clk,
     // MUX between memory and register (for ALU output and read data from memory)
     MUX_3_to_1 MUX_mem_to_reg(
         .data1_input(ALU_output),
-        .data2_input(Mem_output),
+        .data2_input(mem_rdata_D),
         .data3_input(PC_plusfour),                 //PC+4
         .select_input(MemtoReg_control),
         .data_output(rd_data)           //register write data input
