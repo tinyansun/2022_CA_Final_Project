@@ -676,26 +676,28 @@ module ALU(
     output [31 : 0] ALU_output;
 
     reg ALU_zero_reg;
-    reg [31 : 0] ALU_output_reg;
-    reg muldiv_ready_reg;
+    reg  [31 : 0] ALU_output_reg;
+    wire [31 : 0] ALU_output_wire;
+    wire muldiv_ready_wire;
     assign ALU_zero = ALU_zero_reg; //beq (in_1 - in_2 == 0) ? 1 : 0
-    assign ALU_output = ALU_output_reg;
-    assign muldiv_ready = muldiv_ready_reg;
+    // assign ALU_output = ALU_output_reg;
+    assign muldiv_ready = muldiv_ready_wire;
+    assign ALU_output = (muldiv_ready) ? ALU_output_wire : ALU_output_reg;
 
     mulDiv mulDiv(
         .clk(clk), 
         .rst_n(rst_n), 
         .valid(muldiv_valid),           //if valid == 0, mulDiv does nothing
         .ready(muldiv_ready_reg), 
-        .mode(ALUControl_op_input),  //if (valid == 1) && (op_input == 4'b0110 or 4'b0111), mulDiv works
+        .mode(ALU_control_op_input),  //if (valid == 1) && (op_input == 4'b0110 or 4'b0111), mulDiv works
         .in_A(ALU_input_1), 
         .in_B(ALU_input_2), 
-        .out(ALU_output_reg)
+        .out(ALU_output_wire)
     );
 
     always @(ALU_input_1, ALU_input_2, ALU_control_op_input)
     begin
-        case(ALUControl_op_input)
+        case(ALU_control_op_input)
             4'b0001: begin 
                 ALU_output_reg = ALU_input_1 + ALU_input_2;
                 // muldiv_ready_reg = 1;
