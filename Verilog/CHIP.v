@@ -33,7 +33,7 @@ module CHIP(clk,
     //---------------------------------------//
 
     //-------------------PC part----------------------------------------
-	
+	wire PC_nxt_wire;
 	wire[31 : 0] mux_for_jump; // wire between two MUX
 	reg [31 : 0] PC_plusfour;
 	reg [31 : 0] PC_shift;
@@ -70,7 +70,7 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-
+	assign PC_nxt_wire = PC_nxt;
 
 	//output
 	assign mem_wen_D = MemWrite_control;
@@ -198,7 +198,7 @@ module CHIP(clk,
         .data1_input(mux_for_jump),
         .data2_input(jump_address),
         .select_input(jump_select_output),
-        .data_output(PC_nxt)               
+        .data_output(PC_nxt_wire)               
     );
 	
 	//----------------------------fsm---------------------------------------------
