@@ -32,21 +32,28 @@ module CHIP(clk,
     wire   [31:0] rd_data     ;              //
     //---------------------------------------//
 
-    // Todo: other wire/reg
-    assign rs1 = instruction[19 : 15];
-    assign rs2 = instruction[24 : 20];
-    assign rd = instruction[11 : 7];
+    //-------------------PC part----------------------------------------
+	
+	wire mux_for_jump; // wire between two MUX
+	reg [31 : 0] PC_plusfour;
+	reg [31 : 0] PC_shift;
+	reg [31 : 0] jump_address;
+	integer i;
+	
+	//-------------------PC_end-----------------------------------------
+    
     wire Branch_control;
     wire MemRead_control;
     wire MemWrite_control;
+	
     reg  [1 : 0] MemtoReg_control;
     reg  [1 : 0] ALUOp_control;
     wire ALUSrc_control_1;
     wire ALUSrc_control_2;
     wire jump_select;
-
+	
     wire [31 : 0] imm_gen_output;
-
+	
     reg  [3 : 0] ALU_operation;
     wire [31 : 0] ALU_input_1;
     wire [31 : 0] ALU_input_2;
@@ -55,8 +62,15 @@ module CHIP(clk,
     
     wire Mem_Read_Write;
     wire [31 : 0] Mem_output;
+	//--------------------------------assign--------------------------------------------
+	
+	assign rs1 = mem_rdata_I[19 : 15];
+    assign rs2 = mem_rdata_I[24 : 20];
+    assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
-    //---------------------------------------//
+    assign mem_addr_I = PC;
+	
+	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
         .clk(clk),                           //
@@ -144,10 +158,18 @@ module CHIP(clk,
     );
 	
 	// MUX between PC+4 & PC shift left
-	MUX_2_to_1 MUX_PC(
+	MUX_2_to_1 MUX_branch(
         .data1_input(PC_plusfour),
         .data2_input(PC_shift),
         .select_input(Branch_output & ALU_zero),
+        .data_output(mux_for_jump)               
+    );
+	
+	// MUX for jump decision
+	MUX_2_to_1 MUX_jump(
+        .data1_input(mux_for_jump),
+        .data2_input(jump_address),
+        .select_input(jump_select_output),
         .data_output(PC_nxt)               
     );
 	
@@ -192,19 +214,43 @@ module CHIP(clk,
 			OUT : begin
 				state_nxt = IDLE;
 			end
+			default : begin
+				state_nxt = state;
+			end
+		endcase
+	end
+	
+	// counter
+	always@(*)begin
+		case(state_nxt)
+			MULTIPLE : begin
+				counter_nxt = counter+1;
+			end
+			default:begin
+				counter_nxt = 0;
+			end
 		endcase
 	end
 	
 //-----------------------------------PC_comb---------------------------------------
-	reg [31 : 0] PC_plusfour;
-	reg [31 : 0] PC_shift;
 
 	always@(*)begin
 		PC_plusfour = PC + 4;
 		PC_shift = PC + (imm_gen_output << 1);
 	end
+	always@(*)begin
+		for(i=28; i<=31; i=i+1)begin
+			jump_address[i] = PC_plusfour[i];
+		end
+		for(i=0; i<=25; i=i+1)begin
+			jump_address[i+2] = mem_rdata_I[i];
+		end
+		for(i=0; i<=1; i=i+1)begin
+			jump_address[i] = 0;
+		end
+	end
 	
-//-----------------------------------PC_seq----------------------------------------
+//-----------------------------------sequential part----------------------------------------
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
