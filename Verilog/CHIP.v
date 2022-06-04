@@ -61,15 +61,15 @@ module CHIP(clk,
     wire [31 : 0] ALU_output;
     wire muldiv_ready;
     
-    wire Mem_Read_Write;
-    wire [31 : 0] Mem_output;
+    // wire Mem_Read_Write;
+    // wire [31 : 0] Mem_output;
 	reg muldiv_valid;
 	//--------------------------------assign--------------------------------------------
 	
 	assign rs1 = mem_rdata_I[19 : 15];
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
-    assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
+    // assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
 	assign PC_nxt_wire = PC_nxt;
 
 	//output
@@ -527,7 +527,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     // Definition of ports
     input         clk, rst_n;
     input         valid;
-    input  [3:0]  mode; // mode: 0: mulu, 1: divu, //2: and, 3: avg
+    input  [3:0]  mode; // mode: 0110: mulu, 0111: divu, //2: and, 3: avg
     output        ready;
 
     input  [31:0] in_A, in_B;
