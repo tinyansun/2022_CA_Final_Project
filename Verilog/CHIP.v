@@ -269,7 +269,7 @@ module CHIP(clk,
 				counter_nxt = counter+1;
 			end
 			default:begin
-				counter_nxt = counter;
+				counter_nxt = 0;
 			end
 		endcase
 	end
