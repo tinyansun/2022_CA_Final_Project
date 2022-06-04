@@ -676,9 +676,10 @@ module ALU(
     output ALU_zero;
     output [31 : 0] ALU_output;
 
+    reg ALU_zero_reg;
     reg [31 : 0] ALU_output_reg;
     reg muldiv_ready_reg;
-    assign ALU_zero = (!ALU_output_reg)[0]; //beq (in_1 - in_2 == 0) ? 1 : 0
+    assign ALU_zero = ALU_zero_reg; //beq (in_1 - in_2 == 0) ? 1 : 0
     assign ALU_output = ALU_output_reg;
     assign muldiv_ready = muldiv_ready_reg;
 
@@ -702,6 +703,8 @@ module ALU(
             end
             4'b0010: begin
                 ALU_output_reg = ALU_input_1 - ALU_input_2;
+                if (ALU_output_reg == 32'b0) ALU_zero_reg = 1;
+                else                         ALU_zero_reg = 0;
                 // muldiv_ready_reg = 1;
             end
             4'b0011: begin
