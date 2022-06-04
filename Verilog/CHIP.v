@@ -69,6 +69,16 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24 : 20];
     assign rd = mem_rdata_I[11 : 7];
     assign Mem_Read_Write_control = (MemRead_control) ? 0 : 1;  //memory's implementaion requires only either of MemRead_control or MemWrite_control
+<<<<<<< HEAD
+=======
+
+	//output
+	assign mem_wen_D = MemWrite_control;
+    assign mem_addr_D = ALU_output;
+    assign mem_wdata_D = rs2;
+	
+
+>>>>>>> 2b19d3b7431b4a9c109b721b5d09f44f4dc42ff3
 
     reg mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
@@ -525,7 +535,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     output        ready;
 
     input  [31:0] in_A, in_B;
-    output [63:0] out;
+    output [31:0] out;
 
     // Definition of states
     parameter IDLE = 2'd0;
@@ -542,7 +552,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
 
     // Todo 5: Wire assignments
     assign ready = (state == OUT) ? 1 : 0;
-    assign out = (state == OUT) ? shreg : 0;
+    assign out = (state == OUT) ? shreg[31:0] : 0;
 
     // Combinational always block
     // Todo 1: Next-state logic of state machine
