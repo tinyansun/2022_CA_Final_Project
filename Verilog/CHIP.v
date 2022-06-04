@@ -24,7 +24,7 @@ module CHIP(clk,
     // Do not modify this part!!!            //
     // Exception: You may change wire to reg //
     reg    [31:0] PC          ;              //
-    wire   [31:0] PC_nxt      ;              //
+    reg    [31:0] PC_nxt      ;              //
     wire          regWrite    ;              //
     wire   [ 4:0] rs1, rs2, rd;              //
     wire   [31:0] rs1_data    ;              //
@@ -54,7 +54,7 @@ module CHIP(clk,
 	
     wire [31 : 0] imm_gen_output;
 	
-    reg  [3 : 0] ALU_operation;
+    wire [3 : 0]  ALU_operation;
     wire [31 : 0] ALU_input_1;
     wire [31 : 0] ALU_input_2;
     wire ALU_zero;
@@ -727,10 +727,10 @@ module ALU(
     begin
         if (!rst_n) begin
             ALU_output_reg <= 0;
-            muldiv_ready_wire <= 0;
+            // muldiv_ready_wire <= 0;
         end
         if (clk) begin
-            muldiv_ready_wire <= 0;
+            // muldiv_ready_wire <= 0;
         end
     end
 
