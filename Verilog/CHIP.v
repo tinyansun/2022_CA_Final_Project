@@ -90,7 +90,7 @@ module CHIP(clk,
         begin
             mem_addr_I_reg = PC;
         end
-    
+    end
 	//---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -107,7 +107,7 @@ module CHIP(clk,
 
     // Todo: any combinational/sequential circuit
 
-    Control Control(
+    Control Control (
         .Op_input(mem_rdata_I[6 : 0]),
         .Branch_output(Branch_control),
         .MemRead_output(MemRead_control),
@@ -349,9 +349,7 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
 endmodule
 
 module Control
-(   clk,
-    rst_n,
-    state,
+(   
     Op_input,
     Branch_output,
     MemRead_output,
@@ -363,8 +361,7 @@ module Control
 	RegWrite_output,
     jump_select_output
 );
-input clk, rst_n;
-input  [2 : 0] state;
+
 input  [6 : 0] Op_input;
 output reg [1 : 0] ALUOp_output;
 output reg ALUSrc_output_1;
