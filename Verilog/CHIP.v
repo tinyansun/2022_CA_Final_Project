@@ -473,7 +473,8 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 			imm_reg[9 : 4] = inst_input[30 : 25];
 			imm_reg[10] = inst_input[7];
 			imm_reg[11] = inst_input[31];
-			imm_output_reg = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+			imm_output_reg_temp = {{20{imm_reg[11]}} , imm_reg[11 : 0]};
+            imm_output_reg = imm_output_reg_temp << 1;
 		end
 		else if (inst_input[6 : 0] == 7'b0010111) // auipc
 		begin
