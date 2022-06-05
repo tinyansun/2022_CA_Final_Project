@@ -526,8 +526,9 @@ module ALU_Control(
     ALUControl_op_input,
     ALUControl_instruction_input,
     ALUControl_output
-);  
-    input rst_n; 
+);
+
+    input   rst_n;
     input  [1 : 0] ALUControl_op_input;
     input  [31 : 0] ALUControl_instruction_input;
     output [3 : 0] ALUControl_output;
