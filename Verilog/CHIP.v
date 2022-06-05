@@ -531,7 +531,7 @@ module ALU_Control(
     always @(ALUControl_op_input or ALUControl_instruction_input)
     begin
         case(ALUControl_op_input)
-            2'b00: ALUControl_output_reg = 4'b0001;//ld,sd add
+            2'b00: ALUControl_output_reg = 4'b0001;//lw,sw add
             2'b01: ALUControl_output_reg = 4'b0010;//bq    subtract
             2'b10: begin
                 //Rtype add/sub/AND/OR
@@ -544,8 +544,10 @@ module ALU_Control(
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
             end
             2'b11: begin
-                if ({ALUControl_instruction_input[14:12],ALUControl_instruction_input[6:0]} == 10'b0100010011) ALUControl_output_reg = 4'b1000;//SLTI
-                else ALUControl_output_reg = 4'b0001;//Itype add???
+                if      ({ALUControl_instruction_input[14:12],ALUControl_instruction_input[6:0]} == 10'b0100010011)   ALUControl_output_reg = 4'b1000;//SLTI
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0100000101) ALUControl_output_reg = 4'b1001;//SRAI
+                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000001) ALUControl_output_reg = 4'b1010;//SLLI
+                else ALUControl_output_reg = 4'b0001;//jal,jalr,addi,auipc
             end
         endcase
     end
@@ -752,6 +754,12 @@ module ALU(
             end
             4'b1000: begin
                 ALU_output_reg = (ALU_input_1 < ALU_input_2) ? 32'd1 : 0;
+            end
+            4'b1001: begin
+                ALU_output_reg = ALU_input_1 >>> ALU_input_2;    
+            end
+            4'b1010: begin
+                ALU_output_reg = ALU_input_1 << ALU_input_2;
             end
         endcase
     end
