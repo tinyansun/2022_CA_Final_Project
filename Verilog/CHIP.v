@@ -240,11 +240,11 @@ module CHIP(clk,
 					end
 					6 : begin
 						state_nxt = MULTIPLE;
-						muldiv_valid = 0;
+						muldiv_valid = 1;
 					end
 					7 : begin
 						state_nxt = MULTIPLE;
-						muldiv_valid = 0;
+						muldiv_valid = 1;
 					end
 					default : begin
 						state_nxt = state;
@@ -259,7 +259,7 @@ module CHIP(clk,
 			MULTIPLE : begin
 				if(counter == 32)begin
 					state_nxt = OUT;
-					muldiv_valid = 1;
+					muldiv_valid = 0;
 				end
 				else begin
 					state_nxt = MULTIPLE;
