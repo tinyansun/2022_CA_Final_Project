@@ -437,9 +437,9 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 	output [31 : 0] imm_output;
 
 	reg [11 : 0] imm_reg;
-    reg [20 : 0] imm_21_reg;
+    reg [19 : 0] imm_21_reg;
 	reg [31 : 0] imm_output_reg;
-	assign imm_output = imm_output_reg;
+	assign imm_output = imm_output_reg << 1;
 
 	always @(inst_input)
 	begin
@@ -468,17 +468,17 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 		end
 		else if (inst_input[6 : 0] == 7'b1101111) // jal
 		begin
-			// imm_20_reg[9 : 0] = inst_input[30 : 21];
-			// imm_20_reg[10] = inst_input[20];
-			// imm_20_reg[18 : 11] = inst_input[19 : 12];
-			// imm_20_reg[19] = inst_input[31];
-			// imm_output_reg = {{12{imm_20_reg[19]}} , imm_20_reg[19 : 0]};
-            imm_21_reg[10 : 1] = inst_input[21 : 12];
-			imm_21_reg[11] = inst_input[22];
-			imm_21_reg[19 : 12] = inst_input[30 : 23];
-			imm_21_reg[20] = inst_input[31];
-            imm_21_reg[0] = 0;
-			imm_output_reg = {{11{imm_21_reg[20]}} , imm_21_reg[20 : 0] };
+			// imm_21_reg[10 : 1] = inst_input[30 : 21];
+			// imm_21_reg[11] = inst_input[20];
+			// imm_21_reg[19 : 12] = inst_input[19 : 12];
+			// imm_21_reg[20] = inst_input[31];
+			// imm_output_reg = {{11{imm_21_reg[20]}} , imm_21_reg[20 : 0]};
+            imm_21_reg[9 : 0] = inst_input[30 : 21];
+			imm_21_reg[10] = inst_input[20];
+			imm_21_reg[18 : 11] = inst_input[19 : 12];
+			imm_21_reg[19] = inst_input[31];
+            // imm_21_reg[0] = 0;
+			imm_output_reg = {{12{imm_21_reg[19]}} , imm_21_reg[19 : 0] };
 		end
 	end
 
