@@ -113,7 +113,7 @@ module CHIP(clk,
     // Todo: any combinational/sequential circuit
 
     Control Control (
-        .rst_n(rst_n)
+        .rst_n(rst_n),
         .Op_input(mem_rdata_I[6 : 0]),
         .Branch_output(Branch_control),
         .MemRead_output(MemRead_control),
@@ -128,7 +128,7 @@ module CHIP(clk,
 
     // Imm Gen (32 bits in, 32 bits out)
     Sign_Extend Sign_Extend(
-        .rst_n(rst_n)
+        .rst_n(rst_n),
         .inst_input (mem_rdata_I[31 : 0]),
         .imm_output (imm_gen_output)
     );
@@ -367,7 +367,7 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
 endmodule
 
 module Control
-(   rst_n
+(   rst_n,
     Op_input,
     Branch_output,
     MemRead_output,
@@ -439,7 +439,7 @@ endmodule
 
 module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and jal
 (   
-    rst_n
+    rst_n,
 	inst_input,
 	imm_output
 );
@@ -525,7 +525,8 @@ module ALU_Control(
     ALUControl_op_input,
     ALUControl_instruction_input,
     ALUControl_output
-);
+);  
+    input rst_n; 
     input  [1 : 0] ALUControl_op_input;
     input  [31 : 0] ALUControl_instruction_input;
     output [3 : 0] ALUControl_output;
