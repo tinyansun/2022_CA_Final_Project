@@ -783,7 +783,10 @@ module ALU(
             4'b1010: begin
                 ALU_output_reg = ALU_input_1 << ALU_input_2;
             end
-            default: ALU_output_reg = 0;
+            default: begin
+                ALU_output_reg = 0;
+                ALU_zero_reg = 0;
+            end
         endcase
     end
 
