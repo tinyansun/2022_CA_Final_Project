@@ -253,22 +253,18 @@ module CHIP(clk,
 				endcase
 			end
 			SINGLE : begin
-				state_nxt = OUT;
+				state_nxt = IDLE;
 				muldiv_valid = 0;
 			end
 			MULTIPLE : begin
 				if(counter == 33)begin
-					state_nxt = OUT;
+					state_nxt = IDLE;
 					muldiv_valid = 0;
 				end
 				else begin
 					state_nxt = MULTIPLE;
 					muldiv_valid = 0;
 				end
-			end
-			OUT : begin
-				state_nxt = IDLE;
-				muldiv_valid = 0;
 			end
 			default : begin
 				state_nxt = state;
