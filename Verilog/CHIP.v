@@ -480,7 +480,7 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 		end
 		else if (inst_input[6 : 0] == 7'b0010111) // auipc
 		begin
-			imm_output_reg = {{12{inst_input[31]}} , inst_input[31 : 12]};
+			imm_output_reg = {inst_input[31 : 12] , {12{inst_input[31]}}};
 		end
 		else if (inst_input[6 : 0] == 7'b1101111) // jal
 		begin
