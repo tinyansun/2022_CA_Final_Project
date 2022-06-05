@@ -473,10 +473,10 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 			// imm_20_reg[18 : 11] = inst_input[19 : 12];
 			// imm_20_reg[19] = inst_input[31];
 			// imm_output_reg = {{12{imm_20_reg[19]}} , imm_20_reg[19 : 0]};
-            imm_20_reg[10 : 1] = inst_input[21 : 12];
-			imm_20_reg[11] = inst_input[22];
-			imm_20_reg[19 : 12] = inst_input[30 : 23];
-			imm_20_reg[20] = inst_input[31];
+            imm_21_reg[10 : 1] = inst_input[21 : 12];
+			imm_21_reg[11] = inst_input[22];
+			imm_21_reg[19 : 12] = inst_input[30 : 23];
+			imm_21_reg[20] = inst_input[31];
             imm_21_reg[0] = 0;
 			imm_output_reg = {{11{imm_21_reg[20]}} , imm_21_reg[20 : 0] };
 		end
