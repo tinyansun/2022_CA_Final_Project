@@ -451,7 +451,8 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 	reg [11 : 0] imm_reg;
     reg [19 : 0] imm_21_reg;
 	reg [31 : 0] imm_output_reg;
-	assign imm_output = imm_output_reg << 1;
+    reg [31 : 0] imm_output_reg_temp;
+	assign imm_output = imm_output_reg;
 
 	always @(inst_input)
 	begin
@@ -490,7 +491,8 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 			imm_21_reg[18 : 11] = inst_input[19 : 12];
 			imm_21_reg[19] = inst_input[31];
             // imm_21_reg[0] = 0;
-			imm_output_reg = {{12{imm_21_reg[19]}} , imm_21_reg[19 : 0] };
+			imm_output_reg_temp = {{12{imm_21_reg[19]}} , imm_21_reg[19 : 0] };
+            imm_output_reg = imm_output_reg_temp << 1;
 		end
 	end
 
