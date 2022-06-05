@@ -497,12 +497,16 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 			imm_output_reg_temp = {{12{imm_21_reg[19]}} , imm_21_reg[19 : 0] };
             imm_output_reg = imm_output_reg_temp << 1;
 		end
+        else if
+        begin 
+            if (!rst_n) imm_output_reg <= 0;
+        end
 	end
 
-    always @(negedge rst_n)
-    begin
-        if (!rst_n) imm_output_reg <= 0;
-    end
+    // always @(posedge clk or negedge rst_n)
+    // begin
+    //     if (!rst_n) imm_output_reg <= 0;
+    // end
 
 endmodule
 
