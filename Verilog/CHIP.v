@@ -543,7 +543,10 @@ module ALU_Control(
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001000) ALUControl_output_reg = 4'b0110;//MUL
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
             end
-            2'b11: ALUControl_output_reg = 4'b0001;//Itype add???
+            2'b11: begin
+                if ({ALUControl_instruction_input[14:12],ALUControl_instruction_input[6:0]} == 10'b0100010011) ALUControl_output_reg = 4'b1000;//SLTI
+                else ALUControl_output_reg = 4'b0001;//Itype add???
+            end
         endcase
     end
 
@@ -746,6 +749,9 @@ module ALU(
             4'b0101: begin
                 ALU_output_reg = ALU_input_1 ^ ALU_input_2;
                 // muldiv_ready_reg = 1;
+            end
+            4'b1000: begin
+                ALU_output_reg = (ALU_input_1 < ALU_input_2) ? 32'd1 : 0;
             end
         endcase
     end
