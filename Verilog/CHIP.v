@@ -76,7 +76,7 @@ module CHIP(clk,
 	//output
 	assign mem_wen_D = MemWrite_control;
     assign mem_addr_D = ALU_output; 
-    assign mem_wdata_D = rs2;
+    assign mem_wdata_D = rs2_data;
 
     reg [31 : 0] mem_addr_I_reg;
     assign mem_addr_I = mem_addr_I_reg;
