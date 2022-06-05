@@ -86,13 +86,9 @@ module CHIP(clk,
     //---------------------------------wait for mul and div--------------------------------------------
 	always @(*)
     begin
-        if ((state == 2'd2) & (state_nxt != 2'd2))
+        if ((state == 2'd2))
         begin
-            mem_addr_I_reg = 32'h00010000;
-            PC_nxt = PC_nxt - 4;
-        end
-        else if (state_nxt == 2'd2)
-        begin
+            mem_addr_I_reg = PC - 4;
             PC_nxt = PC_nxt - 4;
         end
         else
