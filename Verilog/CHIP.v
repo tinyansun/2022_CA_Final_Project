@@ -783,15 +783,8 @@ module ALU(
             4'b1010: begin
                 ALU_output_reg = ALU_input_1 << ALU_input_2;
             end
+            default: ALU_output_reg = 0;
         endcase
-    end
-
-    always @(posedge clk or negedge rst_n)
-    begin
-        if (!rst_n) begin
-            ALU_output_reg <= 0;
-            // muldiv_ready_wire <= 0;
-        end
     end
 
 endmodule
