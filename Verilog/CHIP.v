@@ -754,6 +754,7 @@ module ALU(
         case(ALU_control_op_input)
             4'b0001: begin 
                 ALU_output_reg = ALU_input_1 + ALU_input_2;
+                ALU_zero_reg = 0;
                 // muldiv_ready_reg = 1;
             end
             4'b0010: begin
@@ -764,24 +765,30 @@ module ALU(
             end
             4'b0011: begin
                 ALU_output_reg = ALU_input_1 & ALU_input_2;
+                ALU_zero_reg = 0;
                 // muldiv_ready_reg = 1;
             end
             4'b0100: begin
                 ALU_output_reg = ALU_input_1 | ALU_input_2;
+                ALU_zero_reg = 0;
                 // muldiv_ready_reg = 1;
             end
             4'b0101: begin
                 ALU_output_reg = ALU_input_1 ^ ALU_input_2;
+                ALU_zero_reg = 0;
                 // muldiv_ready_reg = 1;
             end
             4'b1000: begin
                 ALU_output_reg = (ALU_input_1 < ALU_input_2) ? 32'd1 : 0;
+                ALU_zero_reg = 0;
             end
             4'b1001: begin
                 ALU_output_reg = ALU_input_1 >>> ALU_input_2;    
+                ALU_zero_reg = 0;
             end
             4'b1010: begin
                 ALU_output_reg = ALU_input_1 << ALU_input_2;
+                ALU_zero_reg = 0;
             end
             default: begin
                 ALU_output_reg = 0;
