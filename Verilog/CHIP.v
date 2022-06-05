@@ -546,7 +546,7 @@ module ALU_Control(
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000110) ALUControl_output_reg = 4'b0100;//OR
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000100) ALUControl_output_reg = 4'b0101;//XOR
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001000) ALUControl_output_reg = 4'b0110;//MUL
-                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
+                else ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
             end
             2'b11: begin
                 if      ({ALUControl_instruction_input[14:12],ALUControl_instruction_input[6:0]} == 10'b0100010011)   ALUControl_output_reg = 4'b1000;//SLTI
