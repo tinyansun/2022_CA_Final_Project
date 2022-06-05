@@ -93,6 +93,7 @@ module CHIP(clk,
         else
         begin
             mem_addr_I_reg = PC;
+			PC_nxt = PC_nxt;
         end
     end
 	//---------------------------------------//
@@ -219,32 +220,41 @@ module CHIP(clk,
 				case(ALU_operation)
 					1 : begin
 						state_nxt = SINGLE;
+						muldiv_valid = 0;
 					end
 					2 : begin
 						state_nxt = SINGLE;
+						muldiv_valid = 0;
 					end
 					3 : begin
 						state_nxt = SINGLE;
+						muldiv_valid = 0;
 					end
 					4 : begin
 						state_nxt = SINGLE;
+						muldiv_valid = 0;
 					end
 					5 : begin
 						state_nxt = SINGLE;
+						muldiv_valid = 0;
 					end
 					6 : begin
 						state_nxt = MULTIPLE;
+						muldiv_valid = 0;
 					end
 					7 : begin
 						state_nxt = MULTIPLE;
+						muldiv_valid = 0;
 					end
 					default : begin
 						state_nxt = state;
+						muldiv_valid = 0;
 					end
 				endcase
 			end
 			SINGLE : begin
 				state_nxt = OUT;
+				muldiv_valid = 0;
 			end
 			MULTIPLE : begin
 				if(counter == 32)begin
@@ -258,9 +268,11 @@ module CHIP(clk,
 			end
 			OUT : begin
 				state_nxt = IDLE;
+				muldiv_valid = 0;
 			end
 			default : begin
 				state_nxt = state;
+				muldiv_valid = 0;
 			end
 		endcase
 	end
