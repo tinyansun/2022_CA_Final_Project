@@ -257,7 +257,7 @@ module CHIP(clk,
 				muldiv_valid = 0;
 			end
 			MULTIPLE : begin
-				if(counter == 32)begin
+				if(counter == 33)begin
 					state_nxt = OUT;
 					muldiv_valid = 0;
 				end
