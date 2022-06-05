@@ -426,7 +426,8 @@ begin
     begin
         ALUOp_output = 2'b01;
     end
-    else if (Op_input == 7'b1100111 || Op_input == 7'b1101111) // jalr, jal inst
+    //else if (Op_input == 7'b1100111 || Op_input == 7'b1101111) // jalr, jal inst
+	else
     begin
         ALUOp_output = 2'b11;    
         MemtoReg_output = 2'b10; // select PC+4 result to write data in register
