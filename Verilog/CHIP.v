@@ -421,10 +421,12 @@ begin
     else if (Op_input == 7'b0100011) // sw inst
     begin
         ALUOp_output = 2'b00;
+		MemtoReg_output = 2'b00;
     end
     else if (Op_input == 7'b1100011) // beq inst
     begin
         ALUOp_output = 2'b01;
+		MemtoReg_output = 2'b00;
     end
     //else if (Op_input == 7'b1100111 || Op_input == 7'b1101111) // jalr, jal inst
 	else
