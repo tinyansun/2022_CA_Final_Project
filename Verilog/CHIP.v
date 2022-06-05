@@ -149,6 +149,7 @@ module CHIP(clk,
 
     // ALU Control
     ALU_Control ALU_Control(
+        .rst_n(rst_n),
         .ALUControl_op_input(ALUOp_control),
         .ALUControl_instruction_input(mem_rdata_I[31 : 0]),
         .ALUControl_output(ALU_operation)   //ALU_control_op_input
@@ -517,6 +518,7 @@ module MUX_2_to_1
 endmodule
 
 module ALU_Control(
+    rst_n,
     ALUControl_op_input,
     ALUControl_instruction_input,
     ALUControl_output
