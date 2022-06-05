@@ -497,6 +497,11 @@ module Sign_Extend  // Imm Gen : for I-type, load, store, beq, auipc, jalr and j
 		end
 	end
 
+    always @(negedge rst_n)
+    begin
+        if (!rst_n) imm_output_reg <= 0;
+    end
+
 endmodule
 
 module MUX_2_to_1
@@ -550,6 +555,11 @@ module ALU_Control(
                 else ALUControl_output_reg = 4'b0001;//jal,jalr,addi,auipc
             end
         endcase
+    end
+
+    always @(negedge rst_n) 
+    begin
+        if (!rst_n) ALUControl_output_reg <= 4'b0;
     end
 
 endmodule
