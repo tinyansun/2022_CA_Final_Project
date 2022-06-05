@@ -281,7 +281,7 @@ module CHIP(clk,
 
 	always@(*)begin
 		PC_plusfour = PC + 4;
-		PC_shift = PC + (imm_gen_output << 1);
+		PC_shift = PC + imm_gen_output;
 	end
 	always@(*)begin
 		for(i=28; i<=31; i=i+1)begin
