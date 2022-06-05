@@ -525,8 +525,13 @@ module ALU_Control(
     ALUControl_op_input,
     ALUControl_instruction_input,
     ALUControl_output
+<<<<<<< HEAD
 );
     input   rst_n;
+=======
+);  
+    input rst_n; 
+>>>>>>> ac924070ed47ac8a9fe354a762597476fb3dd3c6
     input  [1 : 0] ALUControl_op_input;
     input  [31 : 0] ALUControl_instruction_input;
     output [3 : 0] ALUControl_output;
@@ -547,7 +552,8 @@ module ALU_Control(
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000110) ALUControl_output_reg = 4'b0100;//OR
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000000100) ALUControl_output_reg = 4'b0101;//XOR
                 else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001000) ALUControl_output_reg = 4'b0110;//MUL
-                else if ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
+                //else ({ALUControl_instruction_input[31:25],ALUControl_instruction_input[14:12]} == 10'b0000001100) ALUControl_output_reg = 4'b0111;//DIV
+				else  ALUControl_output_reg = 4'b0111;//DIV
             end
             2'b11: begin
                 if      ({ALUControl_instruction_input[14:12],ALUControl_instruction_input[6:0]} == 10'b0100010011)   ALUControl_output_reg = 4'b1000;//SLTI
