@@ -22,7 +22,7 @@ module CHIP(clk,
     
     //---------------------------------------//
     // Do not modify this part!!!            //
-    // Exception: You may change wire to reg //
+    // Exception: You may change wire to reg //x`
     reg    [31:0] PC          ;              //
     reg    [31:0] PC_nxt      ;              //
     wire          regWrite    ;              //
@@ -82,10 +82,11 @@ module CHIP(clk,
     assign mem_addr_I = mem_addr_I_reg;
 
     reg [1 : 0] state;
+    reg [1 : 0] state_nxt;
     //---------------------------------wait for mul and div--------------------------------------------
 	always @(*)
     begin
-        if (state == 2'd2)
+        if (state_nxt == 2'd2)
         begin
             mem_addr_I_reg = 32'h00010000;
             PC_nxt = PC_nxt - 4;
@@ -208,7 +209,6 @@ module CHIP(clk,
 	//----------------------------fsm---------------------------------------------
 	reg [5 : 0] counter;
 	reg [5 : 0] counter_nxt;
-	reg [1 : 0] state_nxt;
 	parameter IDLE = 2'd0;
     parameter SINGLE  = 2'd1;
     parameter MULTIPLE  = 2'd2;
@@ -257,7 +257,7 @@ module CHIP(clk,
 				muldiv_valid = 0;
 			end
 			MULTIPLE : begin
-				if(counter == 33)begin
+				if(counter == 32)begin
 					state_nxt = OUT;
 					muldiv_valid = 0;
 				end
