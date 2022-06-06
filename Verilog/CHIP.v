@@ -255,8 +255,11 @@ module CHIP(clk,
 				endcase
 			end
 			MULTIPLE : begin
-                if(counter == 0) muldiv_valid = 1;
-				if(counter == 33)begin
+                if(counter == 0) begin
+                    state_nxt = MULTIPLE;
+                    muldiv_valid = 1;
+                end
+				else if(counter == 33)begin
 					case(ALU_operation)
 						6 : begin
 							state_nxt = MULTIPLE;
