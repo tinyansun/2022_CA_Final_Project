@@ -81,14 +81,22 @@ module CHIP(clk,
 
     reg [1 : 0] state;
     reg [1 : 0] state_nxt;
+    reg [5 : 0] counter;
+    reg [5 : 0] counter_nxt;
+    parameter IDLE = 2'd0;
+    parameter SINGLE  = 2'd1;
+    parameter MULTIPLE  = 2'd2;
+    parameter OUT = 2'd3;
     //---------------------------------wait for mul and div--------------------------------------------
+
 	always @(*)
     begin
         if ((state == 2'd2))
         begin
             mem_addr_I_reg = PC - 4;
 			PC_nxt = PC_nxt_wire;
-            PC_nxt = PC_nxt - 4;
+
+            if (counter != 33) PC_nxt = PC_nxt - 4;
         end
         else
         begin
@@ -209,12 +217,6 @@ module CHIP(clk,
     );
 	
 	//----------------------------fsm---------------------------------------------
-	reg [5 : 0] counter;
-	reg [5 : 0] counter_nxt;
-	parameter IDLE = 2'd0;
-    parameter SINGLE  = 2'd1;
-    parameter MULTIPLE  = 2'd2;
-    parameter OUT = 2'd3;
 	
 	always @(*) begin
 		case(state)
