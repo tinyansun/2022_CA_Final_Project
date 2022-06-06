@@ -81,22 +81,14 @@ module CHIP(clk,
 
     reg [1 : 0] state;
     reg [1 : 0] state_nxt;
-    reg [5 : 0] counter;
-    reg [5 : 0] counter_nxt;
-    parameter IDLE = 2'd0;
-    parameter SINGLE  = 2'd1;
-    parameter MULTIPLE  = 2'd2;
-    parameter OUT = 2'd3;
     //---------------------------------wait for mul and div--------------------------------------------
-
 	always @(*)
     begin
         if ((state == 2'd2))
         begin
             mem_addr_I_reg = PC - 4;
 			PC_nxt = PC_nxt_wire;
-
-            if (counter != 33) PC_nxt = PC_nxt - 4;
+            PC_nxt = PC_nxt - 4;
         end
         else
         begin
@@ -217,10 +209,16 @@ module CHIP(clk,
     );
 	
 	//----------------------------fsm---------------------------------------------
+	reg [5 : 0] counter;
+	reg [5 : 0] counter_nxt;
+	parameter IDLE = 2'd0;
+    parameter SINGLE  = 2'd1;
+    parameter MULTIPLE  = 2'd2;
+    parameter OUT = 2'd3;
 	
 	always @(*) begin
 		case(state)
-			SINGLE : begin
+			IDLE : begin
 				case(ALU_operation)
 					1 : begin
 						state_nxt = SINGLE;
@@ -256,29 +254,14 @@ module CHIP(clk,
 					end
 				endcase
 			end
+			SINGLE : begin
+				state_nxt = IDLE;
+				muldiv_valid = 0;
+			end
 			MULTIPLE : begin
-                if(counter == 0) begin
-                    state_nxt = MULTIPLE;
-                    muldiv_valid = 1;
-                end
-				else if(counter == 33)begin
-					case(ALU_operation)
-						6 : begin
-							state_nxt = MULTIPLE;
-							muldiv_valid = 0;
-							counter_nxt = 0;
-						end
-						7 : begin
-							state_nxt = MULTIPLE;
-							muldiv_valid = 0;
-							counter_nxt = 0;
-						end
-						default : begin
-							state_nxt = SINGLE;
-							muldiv_valid = 0;
-							counter_nxt = 0;
-						end
-					endcase
+				if(counter == 33)begin
+					state_nxt = IDLE;
+					muldiv_valid = 0;
 				end
 				else begin
 					state_nxt = MULTIPLE;
@@ -296,12 +279,7 @@ module CHIP(clk,
 	always@(*)begin
 		case(state_nxt)
 			MULTIPLE : begin
-				if(counter == 33)begin
-					counter_nxt = 0;
-				end
-				else begin
-					counter_nxt = counter+1;
-				end
+				counter_nxt = counter+1;
 			end
 			default:begin
 				counter_nxt = 0;
@@ -331,7 +309,7 @@ module CHIP(clk,
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
-            state <= SINGLE;
+            state <= IDLE;
 			counter <= 0;
         end
         else begin
