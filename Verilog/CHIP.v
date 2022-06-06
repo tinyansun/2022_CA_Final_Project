@@ -90,6 +90,11 @@ module CHIP(clk,
 			PC_nxt = PC_nxt_wire;
             PC_nxt = PC_nxt - 4;
         end
+        else if ((state == 2'd1) && (ALU_operation == 6 | ALU_operation == 7)) begin
+            mem_addr_I_reg = PC - 4;
+            PC_nxt = PC_nxt_wire;
+            PC_nxt = PC_nxt - 4;
+        end
         else
         begin
             mem_addr_I_reg = PC;
