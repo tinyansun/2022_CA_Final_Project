@@ -255,7 +255,7 @@ module CHIP(clk,
 				endcase
 			end
 			MULTIPLE : begin
-				if(counter == 34)begin
+				if(counter == 33)begin
 					case(ALU_operation)
 						6 : begin
 							state_nxt = MULTIPLE;
@@ -290,7 +290,7 @@ module CHIP(clk,
 	always@(*)begin
 		case(state_nxt)
 			MULTIPLE : begin
-				if(counter == 34)begin
+				if(counter == 33)begin
 					counter_nxt = 0;
 				end
 				else begin
