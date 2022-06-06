@@ -257,47 +257,22 @@ module CHIP(clk,
 			MULTIPLE : begin
 				if(counter == 34)begin
 					case(ALU_operation)
-					1 : begin
-						state_nxt = SINGLE;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-					2 : begin
-						state_nxt = SINGLE;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-					3 : begin
-						state_nxt = SINGLE;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-					4 : begin
-						state_nxt = SINGLE;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-					5 : begin
-						state_nxt = SINGLE;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-					6 : begin
-						state_nxt = MULTIPLE;
-						muldiv_valid = 1;
-						counter_nxt = 0;
-					end
-					7 : begin
-						state_nxt = MULTIPLE;
-						muldiv_valid = 1;
-						counter_nxt = 0;
-					end
-					default : begin
-						state_nxt = state;
-						muldiv_valid = 0;
-						counter_nxt = 0;
-					end
-				endcase
+						6 : begin
+							state_nxt = MULTIPLE;
+							muldiv_valid = 1;
+							counter_nxt = 0;
+						end
+						7 : begin
+							state_nxt = MULTIPLE;
+							muldiv_valid = 1;
+							counter_nxt = 0;
+						end
+						default : begin
+							state_nxt = SINGLE;
+							muldiv_valid = 0;
+							counter_nxt = 0;
+						end
+					endcase
 				end
 				else begin
 					state_nxt = MULTIPLE;
@@ -315,7 +290,12 @@ module CHIP(clk,
 	always@(*)begin
 		case(state_nxt)
 			MULTIPLE : begin
-				counter_nxt = counter+1;
+				if(counter == 34)begin
+					counter_nxt = 0;
+				end
+				else begin
+					counter_nxt = counter+1;
+				end
 			end
 			default:begin
 				counter_nxt = 0;
