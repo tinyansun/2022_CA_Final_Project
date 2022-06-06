@@ -218,7 +218,7 @@ module CHIP(clk,
 	
 	always @(*) begin
 		case(state)
-			IDLE : begin
+			SINGLE : begin
 				case(ALU_operation)
 					1 : begin
 						state_nxt = SINGLE;
@@ -254,14 +254,50 @@ module CHIP(clk,
 					end
 				endcase
 			end
-			SINGLE : begin
-				state_nxt = IDLE;
-				muldiv_valid = 0;
-			end
 			MULTIPLE : begin
-				if(counter == 33)begin
-					state_nxt = IDLE;
-					muldiv_valid = 0;
+				if(counter == 34)begin
+					case(ALU_operation)
+					1 : begin
+						state_nxt = SINGLE;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+					2 : begin
+						state_nxt = SINGLE;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+					3 : begin
+						state_nxt = SINGLE;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+					4 : begin
+						state_nxt = SINGLE;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+					5 : begin
+						state_nxt = SINGLE;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+					6 : begin
+						state_nxt = MULTIPLE;
+						muldiv_valid = 1;
+						counter_nxt = 0;
+					end
+					7 : begin
+						state_nxt = MULTIPLE;
+						muldiv_valid = 1;
+						counter_nxt = 0;
+					end
+					default : begin
+						state_nxt = state;
+						muldiv_valid = 0;
+						counter_nxt = 0;
+					end
+				endcase
 				end
 				else begin
 					state_nxt = MULTIPLE;
@@ -309,7 +345,7 @@ module CHIP(clk,
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             PC <= 32'h00010000; // Do not modify this value!!!
-            state <= IDLE;
+            state <= SINGLE;
 			counter <= 0;
         end
         else begin
