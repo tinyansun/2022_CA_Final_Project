@@ -8,6 +8,7 @@ module CHIP(clk,
             mem_rdata_D,
             // For mem_I
             mem_addr_I,
+            
             mem_rdata_I);
 
     input         clk, rst_n ;
